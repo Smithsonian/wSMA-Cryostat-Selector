@@ -28,10 +28,6 @@ setup(
     version='0.0.0',
     license='MIT',
     description='Package for controlling the wSMA Cryostat Selector Wheel',
-    long_description='%s\n%s' % (
-        re.compile('^.. start-badges.*^.. end-badges', re.M | re.S).sub('', read('README.rst')),
-        re.sub(':[a-z]+:`~?(.*?)`', r'``\1``', read('CHANGELOG.rst'))
-    ),
     author='Paul Grimes',
     author_email='pgrimes@cfa.harvard.edu',
     url='https://github.com/Smithsonian/wSMA-Cryostat-Selector',
@@ -62,8 +58,8 @@ setup(
     ],
     python_requires='>=3.6',
     install_requires=[
-        pymodbus,
-        argparse
+        'pymodbus',
+        'argparse'
     ],
     extras_require={
     },
