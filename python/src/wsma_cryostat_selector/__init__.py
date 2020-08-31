@@ -82,7 +82,7 @@ class SelectorWheel(object):
         if r.isError():
             raise RuntimeError("Could not get current position")
         else:
-            return r.registers
+            return r.registers[0]
 
     def get_status(self):
         """Read the current status from the controller.
@@ -93,7 +93,7 @@ class SelectorWheel(object):
         if r.isError():
             raise RuntimeError("Could not get current status")
         else:
-            return r.registers
+            return r.registers[0]
 
     def get_speed(self):
         """Read the current speed setting from the controller.
@@ -104,7 +104,7 @@ class SelectorWheel(object):
         if r.isError():
             raise RuntimeError("Could not get current speed setting")
         else:
-            return r.registers
+            return r.registers[0]
 
     def get_delta(self):
         """Read the current position error from the controller.
@@ -115,7 +115,7 @@ class SelectorWheel(object):
         if r.isError():
             raise RuntimeError("Could not get current _position error")
         else:
-            return r.registers
+            return r.registers[0]
 
     def get_time(self):
         """Read the time take for the last movement from the controller.
@@ -126,7 +126,7 @@ class SelectorWheel(object):
         if r.isError():
             raise RuntimeError("Could not get last movement time")
         else:
-            return r.registers
+            return r.registers[0]
 
     def set_speed(self, speed):
         """Set the speed of motion for the wheel.
