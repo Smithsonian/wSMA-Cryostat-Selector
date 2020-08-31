@@ -158,9 +158,11 @@ class SelectorWheel(object):
         if w.isError():
             raise RuntimeError("Could not set position on controller")
 
+        # Sleep to allow motion to start
+        sleep(self._time_step/4)
         # Wait for motion to complete.
         while self.get_status():
-            sleep(self._time_step)
+            sleep(self._time_step/4)
 
         self._position = self.get_position()
         self._delta = self.get_delta()
@@ -174,9 +176,11 @@ class SelectorWheel(object):
         if w.isError():
             raise RuntimeError("Could not request homing procedure")
 
+        # Sleep to allow motion to start
+        sleep(self._time_step/4)
         # Wait for motion to complete.
         while self.get_status():
-            sleep(self._time_step)
+            sleep(self._time_step/4)
 
         self._position = self.get_position()
         self._speed = self.get_speed()
