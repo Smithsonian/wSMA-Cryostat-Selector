@@ -1,0 +1,747 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<setup version="5">
+    <p display="false">
+        <n>&quot;javascript&quot;</n>
+        <d>&quot;Script Engine Initialization&quot;</d>
+        <c>&quot;GDK&quot;</c>
+        <g>op0=0;op1=0;op2=0;op3=0;op4=0;op5=0</g>
+        <s>op0=0;op1=0;op2=0;op3=0;op4=0;op5=0</s>
+    </p>
+    <p display="false">
+        <n>&quot;VF&quot;</n>
+        <d>&quot;Save VF value&quot;</d>
+        <c>&quot;GDK&quot;</c>
+        <g property="'vf'">&quot;VF?&quot;</g>
+        <v> 10.4</v>
+    </p>
+    <p display="false">
+        <n>&quot;VF&quot;</n>
+        <d>&quot;Set VF to default&quot;</d>
+        <c>&quot;GDK&quot;</c>
+        <g>&quot;VF10.4&quot;</g>
+    </p>
+    <p display="false">
+        <n>&quot;PF&quot;</n>
+        <d>&quot;Save PF value&quot;</d>
+        <c>&quot;GDK&quot;</c>
+        <g property="'pf'">&quot;PF?&quot;</g>
+        <v> 10.0</v>
+    </p>
+    <p display="false">
+        <n>&quot;PF&quot;</n>
+        <d>&quot;Set PF to default&quot;</d>
+        <c>&quot;GDK&quot;</c>
+        <g>&quot;PF10.0&quot;</g>
+    </p>
+    <p display="false">
+        <n>&quot;MOA&quot;</n>
+        <d>&quot;Turn Axis A Off&quot;</d>
+        <c>&quot;Filter/Control&quot;</c>
+        <s>&quot;MO%m&quot;</s>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;TM&quot;</n>
+        <d>&quot;Update Time&quot;</d>
+        <c>&quot;Filter/Control&quot;</c>
+        <g>&quot;TM?&quot;</g>
+        <s>&quot;TM%n&quot;</s>
+        <v>1000.00</v>
+    </p>
+    <p display="false">
+        <n>&quot;CW&quot;</n>
+        <d>&quot;Data Adjustment Bit&quot;</d>
+        <c>&quot;System Config&quot;</c>
+        <g>&quot;MG{Z10}_CW&quot;</g>
+        <s>&quot;CW%n&quot;</s>
+        <v>1</v>
+    </p>
+    <p>
+        <n>&quot;CW&quot;</n>
+        <d>&quot;Program Execution when communications FIFO Full&quot;</d>
+        <c>&quot;System Config&quot;</c>
+        <g>&quot;MG{Z10}_CW4&quot;</g>
+        <s>&quot;CW,%n&quot;</s>
+        <v>1</v>
+    </p>
+    <p display="false">
+        <n>&quot;EO&quot;</n>
+        <d>&quot;Echo&quot;</d>
+        <c>&quot;System Config&quot;</c>
+        <g>&quot;MG{Z10.0}_EO&quot;</g>
+        <s>&quot;EO%n&quot;</s>
+        <v>1</v>
+    </p>
+    <p>
+        <n>&quot;LZ&quot;</n>
+        <d>&quot;Omit Leading Zeros&quot;</d>
+        <c>&quot;System Config&quot;</c>
+        <g>&quot;MG{Z10}_LZ&quot;</g>
+        <s>&quot;LZ%n&quot;</s>
+        <v>1</v>
+    </p>
+    <p>
+        <n>&quot;TR&quot;</n>
+        <d>&quot;Program Trace On (write only)&quot;</d>
+        <c>&quot;Interrogation&quot;</c>
+        <s>&quot;TR%n&quot;</s>
+    </p>
+    <p>
+        <n>&quot;TR thread&quot;</n>
+        <d>&quot;Program Trace on Thread (write only)&quot;</d>
+        <c>&quot;Interrogation&quot;</c>
+        <s>&quot;TR,%n&quot;</s>
+    </p>
+    <p>
+        <n>&quot;AQ1&quot;</n>
+        <d>&quot;Analog Input 1 Configuration&quot;</d>
+        <c>&quot;IO&quot;</c>
+        <g>&quot;MG{Z10}_AQ%r&quot;</g>
+        <s>&quot;AQ,%n&quot;</s>
+        <v>0</v>
+        <r>1</r>
+    </p>
+    <p>
+        <n>&quot;AQ2&quot;</n>
+        <d>&quot;Analog Input 2 Configuration&quot;</d>
+        <c>&quot;IO&quot;</c>
+        <g>&quot;MG{Z10}_AQ%r&quot;</g>
+        <s>&quot;AQ,%n&quot;</s>
+        <v>0</v>
+        <r>2</r>
+    </p>
+    <p>
+        <n>&quot;OP0&quot;</n>
+        <d>&quot;Output Port Bank 0&quot;</d>
+        <c>&quot;IO&quot;</c>
+        <g>&quot;MG{Z10}_OP%r&quot;</g>
+        <s>op%r=n;&quot;OP&quot;.concat(op0);</s>
+        <v>0</v>
+        <r>0</r>
+    </p>
+    <p>
+        <n>&quot;DH&quot;</n>
+        <d>&quot;DHCP Client Enable&quot;</d>
+        <c>&quot;Ethernet&quot;</c>
+        <g property="'dh'">&quot;DH?&quot;</g>
+        <s>if(coms!=&quot;Ethernet&quot;){&quot;DH%n&quot;;}</s>
+        <v> 0</v>
+    </p>
+    <p>
+        <n>&quot;MU&quot;</n>
+        <d>&quot;Multicast Address&quot;</d>
+        <c>&quot;Ethernet&quot;</c>
+        <g>&quot;MU?&quot;</g>
+        <s>&quot;MU%n&quot;</s>
+        <v>239, 255, 19, 56</v>
+    </p>
+    <p>
+        <n>&quot;SM&quot;</n>
+        <d>&quot;Subnet Mask&quot;</d>
+        <c>&quot;Ethernet&quot;</c>
+        <g>&quot;SM?&quot;</g>
+        <s>&quot;SM%n&quot;</s>
+        <v>0, 0, 0, 0</v>
+    </p>
+    <p>
+        <n>&quot;IA&quot;</n>
+        <d>&quot;IP Address&quot;</d>
+        <c>&quot;Ethernet&quot;</c>
+        <g>&quot;IA?&quot;</g>
+        <s>if(dh==0 &amp;&amp; coms!=&quot;Ethernet&quot;){&quot;IA%n&quot;;}</s>
+        <v>192, 168, 42, 100</v>
+    </p>
+    <p>
+        <n>&quot;IK&quot;</n>
+        <d>&quot;Ethernet Port Blocking&quot;</d>
+        <c>&quot;Ethernet&quot;</c>
+        <g>&quot;IK?&quot;</g>
+        <s>&quot;IK%n&quot;</s>
+        <v>1</v>
+    </p>
+    <p display="false">
+        <n>&quot;A3A&quot;</n>
+        <d>&quot;Amplifier Hall Correction&quot;</d>
+        <c>&quot;System Config&quot;</c>
+        <g>&quot;MG_A3%m&quot;</g>
+        <s>&quot;A3%m=%n&quot;</s>
+        <v>0.0000</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;AGA&quot;</n>
+        <d>&quot;Axis A Amplifier Gain&quot;</d>
+        <c>&quot;Filter/Control&quot;</c>
+        <g>&quot;AG%m=?&quot;</g>
+        <s>&quot;AG%m=%n&quot;</s>
+        <v>1.00</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;AUA&quot;</n>
+        <d>&quot;Axis A Amplifier Current Loop Gain&quot;</d>
+        <c>&quot;Filter/Control&quot;</c>
+        <g>&quot;AU%m=?&quot;</g>
+        <s>&quot;AU%m=%n&quot;</s>
+        <v>1.0</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;BRA&quot;</n>
+        <d>&quot;Axis A Brushed Mode&quot;</d>
+        <c>&quot;System Config&quot;</c>
+        <g>&quot;BR%m=?&quot;</g>
+        <s>&quot;BR%m=%n&quot;</s>
+        <v>0</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;BBA&quot;</n>
+        <d>&quot;Axis A Brushless Phase Begins&quot;</d>
+        <c>&quot;Sine Commutation&quot;</c>
+        <g>&quot;BB%m=?&quot;</g>
+        <s>&quot;BB%m=%n&quot;</s>
+        <v>0.00</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;BIA&quot;</n>
+        <d>&quot;Axis A Brushless Inputs&quot;</d>
+        <c>&quot;Sine Commutation&quot;</c>
+        <g>&quot;BI%m=?&quot;</g>
+        <s>&quot;BI%m=%n&quot;</s>
+        <v>0</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;BMA&quot;</n>
+        <d>&quot;Axis A Brushless Modulo&quot;</d>
+        <c>&quot;Sine Commutation&quot;</c>
+        <g>&quot;BM%m=?&quot;</g>
+        <s>&quot;BM%m=%n&quot;</s>
+        <v>2000.0000</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;BOA&quot;</n>
+        <d>&quot;Axis A Brushless Offset&quot;</d>
+        <c>&quot;Sine Commutation&quot;</c>
+        <g>&quot;BO%m=?&quot;</g>
+        <s>&quot;BO%m=%n&quot;</s>
+        <v>0.0000</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;BQA&quot;</n>
+        <d>&quot;Axis A Brushless Offset Dual DAC&quot;</d>
+        <c>&quot;Sine Commutation&quot;</c>
+        <g>&quot;BQ%m=?&quot;</g>
+        <s>&quot;BQ%m=%n&quot;</s>
+        <v>0.0000</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;ACA&quot;</n>
+        <d>&quot;Axis A Acceleration&quot;</d>
+        <c>&quot;Independent Motion&quot;</c>
+        <g>&quot;AC%m=?&quot;</g>
+        <s>&quot;AC%m=%n&quot;</s>
+        <v>49152</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;AFA&quot;</n>
+        <d>&quot;Axis A Analog Feedback Select&quot;</d>
+        <c>&quot;Filter/Control&quot;</c>
+        <g>&quot;AF%m=?&quot;</g>
+        <s>&quot;AF%m=%n&quot;</s>
+        <v>0</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;BLA&quot;</n>
+        <d>&quot;Axis A Reverse Software Limit&quot;</d>
+        <c>&quot;Error Control&quot;</c>
+        <g>&quot;BL%m=?&quot;</g>
+        <s>&quot;BL%m=%n&quot;</s>
+        <v>-2147483648</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;CEA&quot;</n>
+        <d>&quot;Axis A Encoder Configuration&quot;</d>
+        <c>&quot;System Config&quot;</c>
+        <g>&quot;CE%m=?&quot;</g>
+        <s>&quot;CE%m=%n&quot;</s>
+        <v>12</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;_CN0&quot;</n>
+        <d>&quot;Global Limit Switch Active Level&quot;</d>
+        <c>&quot;System Config&quot;</c>
+        <g>&quot;MG{Z1}_CN0&quot;</g>
+        <s>&quot;CN%n&quot;</s>
+        <v>-1</v>
+    </p>
+    <p>
+        <n>&quot;_CN1&quot;</n>
+        <d>&quot;Global Home Direction&quot;</d>
+        <c>&quot;System Config&quot;</c>
+        <g>&quot;MG{Z1}_CN1&quot;</g>
+        <s>&quot;CN,%n&quot;</s>
+        <v>-1</v>
+    </p>
+    <p>
+        <n>&quot;_CN2&quot;</n>
+        <d>&quot;Global Latch Input Active Level&quot;</d>
+        <c>&quot;System Config&quot;</c>
+        <g>&quot;MG{Z1}_CN2&quot;</g>
+        <s>&quot;CN,,%n&quot;</s>
+        <v>-1</v>
+    </p>
+    <p>
+        <n>&quot;_CN3&quot;</n>
+        <d>&quot;Global Axis-specific Abort&quot;</d>
+        <c>&quot;System Config&quot;</c>
+        <g>&quot;MG{Z1}_CN3&quot;</g>
+        <s>&quot;CN,,,%n&quot;</s>
+        <v>0</v>
+    </p>
+    <p>
+        <n>&quot;_CN4&quot;</n>
+        <d>&quot;Global Abort Input&quot;</d>
+        <c>&quot;System Config&quot;</c>
+        <g>&quot;MG{Z1}_CN4&quot;</g>
+        <s>&quot;CN,,,,%n&quot;</s>
+        <v>0</v>
+    </p>
+    <p>
+        <n>&quot;DCA&quot;</n>
+        <d>&quot;Axis A Deceleration&quot;</d>
+        <c>&quot;Independent Motion&quot;</c>
+        <g>&quot;DC%m=?&quot;</g>
+        <s>&quot;DC%m=%n&quot;</s>
+        <v>49152</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;DVA&quot;</n>
+        <d>&quot;Axis A Dual Loop&quot;</d>
+        <c>&quot;Filter/Control&quot;</c>
+        <g>&quot;DV%m=?&quot;</g>
+        <s>&quot;DV%m=%n&quot;</s>
+        <v>0</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;EMA&quot;</n>
+        <d>&quot;Axis A Ecam Modulus&quot;</d>
+        <c>&quot;Ecam/Gearing&quot;</c>
+        <g>&quot;EM%m=?&quot;</g>
+        <s>&quot;EM%m=%n&quot;</s>
+        <v>0</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;ERA&quot;</n>
+        <d>&quot;Axis A Error Limit&quot;</d>
+        <c>&quot;Filter/Control&quot;</c>
+        <g>&quot;ER%m=?&quot;</g>
+        <s>&quot;ER%m=%n&quot;</s>
+        <v>16384</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;FAA&quot;</n>
+        <d>&quot;Axis A Acceleration Feedforward&quot;</d>
+        <c>&quot;Filter/Control&quot;</c>
+        <g>&quot;FA%m=?&quot;</g>
+        <s>&quot;FA%m=%n&quot;</s>
+        <v>0.00</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;FLA&quot;</n>
+        <d>&quot;Axis A Forward Software Limit&quot;</d>
+        <c>&quot;Error Control&quot;</c>
+        <g>&quot;FL%m=?&quot;</g>
+        <s>&quot;FL%m=%n&quot;</s>
+        <v>2147483647</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;FVA&quot;</n>
+        <d>&quot;Axis A Velocity Feedforward&quot;</d>
+        <c>&quot;Filter/Control&quot;</c>
+        <g>&quot;FV%m=?&quot;</g>
+        <s>&quot;FV%m=%n&quot;</s>
+        <v>0.00</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;GAA&quot;</n>
+        <d>&quot;Axis A Master Axis for Gearing&quot;</d>
+        <c>&quot;ECAM/Gearing&quot;</c>
+        <g>&quot;GA%m=?&quot;</g>
+        <s>if(&quot;ABCDEFGHCACBCCCDCECFCGCHDADBDCDDDEDFDGDHSTMN&quot;.indexOf(n) &gt;= 0){&quot;GA%m=%n&quot;;}</s>
+        <v>0</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;GMA&quot;</n>
+        <d>&quot;Axis A Gantry Mode&quot;</d>
+        <c>&quot;ECAM/Gearing&quot;</c>
+        <g>&quot;GM%m=?&quot;</g>
+        <s>&quot;GM%m=%n&quot;</s>
+        <v>0</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;GRA&quot;</n>
+        <d>&quot;Axis A Gear Ratio&quot;</d>
+        <c>&quot;ECAM/Gearing&quot;</c>
+        <g>&quot;GR%m=?&quot;</g>
+        <s>&quot;GR%m=%n&quot;</s>
+        <v>0.0000</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;EP&quot;</n>
+        <d>&quot;Cam table master interval and phase shift&quot;</d>
+        <c>&quot;ECAM/Gearing&quot;</c>
+        <g>&quot;MG{Z10}_EP&quot;</g>
+        <s>&quot;EP%n&quot;</s>
+        <v>256</v>
+    </p>
+    <p>
+        <n>&quot;GDA&quot;</n>
+        <d>&quot;Axis A Gear Distance&quot;</d>
+        <c>&quot;ECAM/Gearing&quot;</c>
+        <g>&quot;GD%m=?&quot;</g>
+        <s>&quot;GD%m=%n&quot;</s>
+        <v>0</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;ILA&quot;</n>
+        <d>&quot;Axis A Integrator Limit&quot;</d>
+        <c>&quot;Filter/Control&quot;</c>
+        <g>&quot;IL%m=?&quot;</g>
+        <s>&quot;IL%m=%n&quot;</s>
+        <v>9.9982</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;ITA&quot;</n>
+        <d>&quot;Axis A Independent Smoothing Function&quot;</d>
+        <c>&quot;Independent Motion&quot;</c>
+        <g>&quot;IT%m=?&quot;</g>
+        <s>&quot;IT%m=%n&quot;</s>
+        <v>1.0000</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;KSA&quot;</n>
+        <d>&quot;Axis A Step Motor Smoothing&quot;</d>
+        <c>&quot;Stepper Motor&quot;</c>
+        <g>&quot;KS%m=?&quot;</g>
+        <s>&quot;KS%m=%n&quot;</s>
+        <v>2.000</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;KDA&quot;</n>
+        <d>&quot;Axis A Derivative Constant&quot;</d>
+        <c>&quot;Filter/Control&quot;</c>
+        <g>&quot;KD%m=?&quot;</g>
+        <s>&quot;KD%m=%n&quot;</s>
+        <v>64.00</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;KIA&quot;</n>
+        <d>&quot;Axis A Integrator Constant&quot;</d>
+        <c>&quot;Filter/Control&quot;</c>
+        <g>&quot;KI%m=?&quot;</g>
+        <s>&quot;KI%m=%n&quot;</s>
+        <v>0.0000</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;KPA&quot;</n>
+        <d>&quot;Axis A Proportional Constant&quot;</d>
+        <c>&quot;Filter/Control&quot;</c>
+        <g>&quot;KP%m=?&quot;</g>
+        <s>&quot;KP%m=%n&quot;</s>
+        <v>6.00</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;MT&quot;</n>
+        <d>&quot;Axis A Motor Type&quot;</d>
+        <c>&quot;System Config&quot;</c>
+        <g property="'mt%m'">&quot;MT%m=?&quot;</g>
+        <s>&quot;MT%m=%n&quot;</s>
+        <v> -2.5</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;LCA&quot;</n>
+        <d>&quot;Axis A Low Current Stepper Mode&quot;</d>
+        <c>&quot;Stepper Motor&quot;</c>
+        <g>&quot;LC%m=?&quot;</g>
+        <s>&quot;LC%m=%n&quot;</s>
+        <v>15</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;NBA&quot;</n>
+        <d>&quot;Axis A Notch Bandwidth&quot;</d>
+        <c>&quot;Filter/Control&quot;</c>
+        <g>&quot;NB%m=?&quot;</g>
+        <s>&quot;NB%m=%n&quot;</s>
+        <v>0.5</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;NFA&quot;</n>
+        <d>&quot;Axis A Notch Frequency&quot;</d>
+        <c>&quot;Filter/Control&quot;</c>
+        <g>&quot;NF%m=?&quot;</g>
+        <s>&quot;NF%m=%n&quot;</s>
+        <v>0</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;NZA&quot;</n>
+        <d>&quot;Axis A Notch Zero&quot;</d>
+        <c>&quot;Filter/Control&quot;</c>
+        <g>&quot;NZ%m=?&quot;</g>
+        <s>&quot;NZ%m=%n&quot;</s>
+        <v>0.0</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;OEA&quot;</n>
+        <d>&quot;Axis A Off On Error&quot;</d>
+        <c>&quot;Error Control&quot;</c>
+        <g>&quot;OE%m=?&quot;</g>
+        <s>&quot;OE%m=%n&quot;</s>
+        <v>0</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;OFA&quot;</n>
+        <d>&quot;Axis A Filter Offset&quot;</d>
+        <c>&quot;Filter/Control&quot;</c>
+        <g>&quot;OF%m=?&quot;</g>
+        <s>&quot;OF%m=%n&quot;</s>
+        <v>0.0000</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;PLA&quot;</n>
+        <d>&quot;Axis A Pole Filter&quot;</d>
+        <c>&quot;Filter/Control&quot;</c>
+        <g>&quot;PL%m=?&quot;</g>
+        <s>&quot;PL%m=%n&quot;</s>
+        <v>0.0000</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;SPA&quot;</n>
+        <d>&quot;Axis A Speed&quot;</d>
+        <c>&quot;Independent Motion&quot;</c>
+        <g>&quot;SP%m=?&quot;</g>
+        <s>&quot;SP%m=%n&quot;</s>
+        <v>30000</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;TLA&quot;</n>
+        <d>&quot;Axis A Torque Limit&quot;</d>
+        <c>&quot;Filter/Control&quot;</c>
+        <g>&quot;TL%m=?&quot;</g>
+        <s>&quot;TL%m=%n&quot;</s>
+        <v>9.9982</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;TKA&quot;</n>
+        <d>&quot;Axis A Peak Torque Limit&quot;</d>
+        <c>&quot;Filter/Control&quot;</c>
+        <g>&quot;TK%m=?&quot;</g>
+        <s>&quot;TK%m=%n&quot;</s>
+        <v>0.0000</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;VAS&quot;</n>
+        <d>&quot;S Vector Acceleration&quot;</d>
+        <c>&quot;Vector/Linear&quot;</c>
+        <g>&quot;VAS=?&quot;</g>
+        <s>&quot;VAS=%n&quot;</s>
+        <v>256000</v>
+    </p>
+    <p>
+        <n>&quot;VDS&quot;</n>
+        <d>&quot;S Vector Deceleration&quot;</d>
+        <c>&quot;Vector/Linear&quot;</c>
+        <g>&quot;VDS=?&quot;</g>
+        <s>&quot;VDS=%n&quot;</s>
+        <v>256000</v>
+    </p>
+    <p>
+        <n>&quot;VSS&quot;</n>
+        <d>&quot;S Vector Speed&quot;</d>
+        <c>&quot;Vector/Linear&quot;</c>
+        <g>&quot;VSS=?&quot;</g>
+        <s>&quot;VSS=%n&quot;</s>
+        <v>25000</v>
+    </p>
+    <p>
+        <n>&quot;YAA&quot;</n>
+        <d>&quot;Axis A Step Drive Resolution&quot;</d>
+        <c>&quot;Stepper Motor&quot;</c>
+        <g>&quot;YA%m=?&quot;</g>
+        <s>&quot;YA%m=%n&quot;</s>
+        <v>256</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;YBA&quot;</n>
+        <d>&quot;Axis A Step Motor Resolution&quot;</d>
+        <c>&quot;Stepper Motor&quot;</c>
+        <g>&quot;YB%m=?&quot;</g>
+        <s>&quot;YB%m=%n&quot;</s>
+        <v>200</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;YCA&quot;</n>
+        <d>&quot;Axis A Step Motor Encoder Resolution&quot;</d>
+        <c>&quot;Stepper Motor&quot;</c>
+        <g>&quot;YC%m=?&quot;</g>
+        <s>&quot;YC%m=%n&quot;</s>
+        <v>16384</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;YSA&quot;</n>
+        <d>&quot;Axis A Stepper Position Maintenance Mode Enable&quot;</d>
+        <c>&quot;Stepper Motor&quot;</c>
+        <g>&quot;YS%m=?&quot;</g>
+        <s>if (mt%m &gt; 1.5 || mt%m &lt; -1.5){&quot;YS%m=%n&quot;;}</s>
+        <v>0</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;BWA&quot;</n>
+        <d>&quot;Axis A Brake Wait&quot;</d>
+        <c>&quot;System Config&quot;</c>
+        <g>&quot;BW%m=?&quot;</g>
+        <s>&quot;BW%m=%n&quot;</s>
+        <v>0</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;HVA&quot;</n>
+        <d>&quot;Axis A Homing Velocity&quot;</d>
+        <c>&quot;Independent Motion&quot;</c>
+        <g>&quot;HV%m=?&quot;</g>
+        <s>&quot;HV%m=%n&quot;</s>
+        <v>256</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;LDA&quot;</n>
+        <d>&quot;Axis A Overtravel Limit Disable&quot;</d>
+        <c>&quot;Error Control&quot;</c>
+        <g>&quot;LD%m=?&quot;</g>
+        <s>&quot;LD%m=%n&quot;</s>
+        <v>0</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;SDA&quot;</n>
+        <d>&quot;Axis A Switch Deceleration&quot;</d>
+        <c>&quot;Independent Motion&quot;</c>
+        <g>&quot;SD%m=?&quot;</g>
+        <s>&quot;SD%m=%n&quot;</s>
+        <v>256000</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;OAA&quot;</n>
+        <d>&quot;Axis A Off on Encoder Failure&quot;</d>
+        <c>&quot;Error Control&quot;</c>
+        <g>&quot;OA%m=?&quot;</g>
+        <s>&quot;OA%m=%n&quot;</s>
+        <v>0</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;OTA&quot;</n>
+        <d>&quot;Axis A Off on Encoder Failure Time&quot;</d>
+        <c>&quot;Error Control&quot;</c>
+        <g>&quot;OT%m=?&quot;</g>
+        <s>&quot;OT%m=%n&quot;</s>
+        <v>30</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;OVA&quot;</n>
+        <d>&quot;Axis A Off on Encoder Failure Voltage&quot;</d>
+        <c>&quot;Error Control&quot;</c>
+        <g>&quot;OV%m=?&quot;</g>
+        <s>&quot;OV%m=%n&quot;</s>
+        <v>0.9438</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;PW&quot;</n>
+        <d>&quot;Password (write only)&quot;</d>
+        <c>&quot;System Config&quot;</c>
+        <s>if(n){&quot;PW%n,%n&quot;;}</s>
+    </p>
+    <p>
+        <n>&quot;MOA&quot;</n>
+        <d>&quot;Axis A Motor Off&quot;</d>
+        <c>&quot;Filter/Control&quot;</c>
+        <g>&quot;MG{Z10}_MO%m&quot;</g>
+        <s>if(n==0){&quot;SH%m&quot;;}else{&quot;MO%m&quot;;}</s>
+        <v>0</v>
+        <a>A</a>
+    </p>
+    <p>
+        <n>&quot;VF&quot;</n>
+        <d>&quot;Variable Format&quot;</d>
+        <c>&quot;System Config&quot;</c>
+        <g>&quot;MG&quot;.concat(vf)</g>
+        <s>vf=n;undefined</s>
+        <v>10.4000</v>
+    </p>
+    <p>
+        <n>&quot;PF&quot;</n>
+        <d>&quot;Position Format&quot;</d>
+        <c>&quot;System Config&quot;</c>
+        <g>&quot;MG&quot;.concat(pf)</g>
+        <s>pf=n;undefined</s>
+        <v>10.0000</v>
+    </p>
+    <p display="false">
+        <n>&quot;VF&quot;</n>
+        <d>&quot;Set VF to desired value&quot;</d>
+        <c>&quot;GDK&quot;</c>
+        <g>&quot;VF&quot;.concat(vf)</g>
+        <s>&quot;VF&quot;.concat(vf)</s>
+    </p>
+    <p display="false">
+        <n>&quot;PF&quot;</n>
+        <d>&quot;Set PF to desired value&quot;</d>
+        <c>&quot;GDK&quot;</c>
+        <g>&quot;PF&quot;.concat(pf)</g>
+        <s>&quot;PF&quot;.concat(pf)</s>
+    </p>
+</setup>

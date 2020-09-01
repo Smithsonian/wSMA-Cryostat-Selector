@@ -251,6 +251,7 @@ JP #EVENTLP;'
 
 SP slowsp; AC slowAC; DC fastDC;  
 
+A[3]=1;				'set error handler to movement in progress - will be reset by forced move to pos 1.
 'MG "Homing Selector Wheel";
 REM****************************************************************************
 SH;
