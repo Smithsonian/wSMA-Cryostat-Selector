@@ -1,6 +1,9 @@
 #AUTO
+starterr=0
 #SETUP
+WT 1,1
 SIA=1,29,14,-1<10>1
+WT 1,1
 YCA=16384
 MT-2.5
 LCA=-15
@@ -13,6 +16,7 @@ TWA=8192
 OB1,1
 WT10,0
 OB1,0
+WT100,0
 A[0]=5
 A[1]=0
 A[2]=1
@@ -25,24 +29,27 @@ P[2]=P[1]+4096
 P[3]=P[2]+4096
 R[0]=0
 R[1]=1
-raw_pos=17000
-dangle=17000
+raw_pos=0
+dangle=0
 calc_mov=0
-raw_pos1=17000
-dangle1=17000
-raw_pos2=17000
-dangle2=17000
+raw_pos1=0
+dangle1=0
+raw_pos2=0
+dangle2=0
+dangle2a=0
 calc_mv2=0
-raw_pos3=17000
-dangle3=17000
+raw_pos3=0
+dangle3=0
+dangle3a=0
 calc_mv3=0
-raw_pos4=17000
-dangle4=17000
+raw_pos4=0
+dangle4=0
+dangle4a=0
 calc_mv4=0
-raw_pos5=17000
-dangle5=17000
+raw_pos5=0
+dangle5=0
+dangle5a=0
 calc_mv5=0
-dspr=256000
 rres=16384
 roffset=rres*8192
 rstep=45.1111
@@ -68,7 +75,6 @@ IF(com_pos=2);setpoint=P[1];ENDIF
 IF(com_pos=3);setpoint=P[2];ENDIF
 IF(com_pos=4);setpoint=P[3];ENDIF
 IF(com_pos>6);setpoint=P[3];ENDIF
-dangle=((setpoint-raw_pos)/rstep)
 IF(com_pos<>cur_pos)
 IF(com_pos=5)
 JP#HOME
@@ -99,6 +105,7 @@ IF(speed>=2);SPmedsp;ACmedAC;DCmedDC;ENDIF
 raw_pos=_TPA-roffset
 dangle=((setpoint-raw_pos)/rstep)
 calc_mov=((raw_pos-setpoint)*drstep)
+IF(@ABS[calc_mov]>16384);starterr=1;JP#SETUP;ENDIF
 bgtime=TIME
 IF(@ABS[dangle]>0.2)
 PRcalc_mov
@@ -112,6 +119,7 @@ raw_pos2=_TPA-roffset
 dangle2=((setpoint-raw_pos2)/rstep)
 calc_mv2=((raw_pos2-setpoint)*drstep)
 IF(@ABS[dangle2]>0.2)
+IF(@ABS[calc_mv2]>16384);starterr=1;JP#SETUP;ENDIF
 PRcalc_mv2
 BGA
 AMA
@@ -123,6 +131,7 @@ raw_pos3=_TPA-roffset
 dangle3=((setpoint-raw_pos3)/rstep)
 calc_mv3=((raw_pos3-setpoint)*drstep)
 IF(@ABS[dangle3]>0.2)
+IF(@ABS[calc_mv3]>16384);starterr=1;JP#SETUP;ENDIF
 PRcalc_mv3
 BGA
 AMA
@@ -134,6 +143,7 @@ raw_pos4=_TPA-roffset
 dangle4=((setpoint-raw_pos4)/rstep)
 calc_mv4=((raw_pos4-setpoint)*drstep)
 IF(@ABS[dangle4]>0.2)
+IF(@ABS[calc_mv4]>16384);starterr=1;JP#SETUP;ENDIF
 SPsuslow;ACsuslowAC;DCfastDC
 PRcalc_mv4
 BGA
@@ -146,6 +156,7 @@ raw_pos5=_TPA-roffset
 dangle5=((setpoint-raw_pos5)/rstep)
 calc_mv5=((raw_pos5-setpoint)*drstep)
 IF(@ABS[dangle5]>0.2)
+IF(@ABS[calc_mv5]>16384);starterr=1;JP#SETUP;ENDIF
 SPsuslow;ACsuslowAC;DCfastDC
 PRcalc_mv5
 BGA
@@ -164,10 +175,14 @@ JP#EVENTLP
 A[3]=1
 SPslowsp;ACslowAC;DCfastDC
 SH
-HMA
+FEA
 bgtime=TIME
 BGA
 AMA
+OB1,1
+WT10,0
+OB1,0
+WT100,0
 home=_TPA-roffset
 endtime=TIME
 deltaT=endtime-bgtime
@@ -177,7 +192,7 @@ P[1]=P[0]+4096
 P[2]=P[1]+4096
 P[3]=P[2]+4096
 A[1]=5
-curr_pos=A[1]
+cur_pos=A[1]
 A[0]=1
 JP#EVENTLP
 #MCTIME
