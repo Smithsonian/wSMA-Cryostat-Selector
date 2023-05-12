@@ -11,9 +11,12 @@ class Selector(object):
     The SelectorWheel object wraps a pymodbus.ModbusTcpClient instance which
     communicates with the Selector Wheel Controller over TCP/IP.
     """
-    #: int: address of the controller's setpoint register, i.e. the _position of the wheel.
-    _setpoint_addr = 1000
-
+    #: int: address of the controller's commanded register, i.e. the _position of the wheel.
+    _compos_addr = 1000
+    
+    #: int: address of the controller's current position register, i.e. the _position of the wheel
+    _curpos_addr = 1001
+    
     #: int: address of the controller's speed register.
     _speed_addr = 1002
 
@@ -23,9 +26,21 @@ class Selector(object):
     #: int: address of the controller's time register.
     _time_addr = 1004
 
-    #: int: address of the controller's _position error register.
-    _delta_addr = 1005
-
+    #: int: address of the controller's angle register (angle in 1/100th degree)
+    _angle_addr = 1005
+    
+    #: int: address of the controller's angle error register (angular error in 1/100th degree)
+    _angle_error_addr = 1006
+    
+    #: int: address of the controller's angle tolerance register (the allowed angular error in 1/100th degree)
+    _angle_tol_addr = 1007
+    
+    #: int: address of the controller's resolver turns register
+    _resolver_turns_addr = 1012
+    
+    #: int: address of the controller's resolver position register
+    _resolver_position_addr = 1013
+    
     _time_step = 0.25
 
     def __init__(self, ip_address=default_IP):
@@ -70,11 +85,21 @@ class Selector(object):
         """int: Time taken for last commanded move. Value is the time take in milliseconds."""
         return self._time
 
-    def get_position(self):
-        """Read the current setpoint position from the controller.
+    def get_command_position(self):
+        """Read the commanded position from the controller.
         Returns:
-            int: current setpoint position."""
-        r = self._client.read_input_registers(self._setpoint_addr)
+            int: commanded position."""
+        r = self._client.read_input_registers(self._compos_addr)
+        if r.isError():
+            raise RuntimeError("Could not get current position")
+        else:
+            return r.registers[0]
+
+    def get_position(self):
+        """Read the current position from the controller.
+        Returns:
+            int: current position."""
+        r = self._client.read_input_registers(self._curpos_addr)
         if r.isError():
             raise RuntimeError("Could not get current position")
         else:
@@ -100,16 +125,6 @@ class Selector(object):
         else:
             return r.registers[0]
 
-    def get_delta(self):
-        """Read the current position error from the controller.
-        Returns:
-            int: current position error in degrees x 100."""
-        r = self._client.read_input_registers(self._delta_addr)
-        if r.isError():
-            raise RuntimeError("Could not get current _position error")
-        else:
-            return r.registers[0]
-
     def get_time(self):
         """Read the time take for the last movement from the controller.
         Returns:
@@ -119,6 +134,48 @@ class Selector(object):
             raise RuntimeError("Could not get last movement time")
         else:
             return r.registers[0]
+
+    def get_angle(self):
+        """Read the current position error from the controller.
+        Returns:
+            int: current position error in degrees x 100."""
+        r = self._client.read_input_registers(self._angle_addr)
+        if r.isError():
+            raise RuntimeError("Could not get current _position error")
+        else:
+            return r.registers[0]
+
+    def get_angle_error(self):
+        """Read the current position error from the controller.
+        Returns:
+            int: current position error in degrees x 100."""
+        r = self._client.read_input_registers(self._angle_error_addr)
+        if r.isError():
+            raise RuntimeError("Could not get current _position error")
+        else:
+            return r.registers[0]
+
+    def get_resolver_turns(self):
+        """Read the current turn count of the resolver.
+        Returns:
+            int: resolver turn count"""
+        r = self._client.read_input_registers(self._resolver_turns_addr)
+        if r.isError():
+            raise RuntimeError("Could not get current _position error")
+        else:
+            return r.registers[0]
+
+    def get_resolver_position(self):
+        """Read the current position of the resolver.
+        Returns:
+            int: current position of the resolver"""
+        r = self._client.read_input_registers(self._resolver_position_addr)
+        if r.isError():
+            raise RuntimeError("Could not get current _position error")
+        else:
+            return r.registers[0]
+
+
 
     def set_speed(self, speed):
         """Set the speed of motion for the wheel.
