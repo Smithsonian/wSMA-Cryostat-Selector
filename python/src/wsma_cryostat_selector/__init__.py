@@ -29,19 +29,19 @@ class Selector(object):
     _time_addr = 1004
 
     #: int: address of the controller's angle register (angle in degrees)
-    _angle_addr = 1005
+    _angle_addr = 2005
     
     #: int: address of the controller's angle error register (angular error in degrees)
-    _angle_error_addr = 1006
+    _angle_error_addr = 2006
     
     #: int: address of the controller's angle tolerance register (the allowed angular error in degrees)
-    _angle_tolerance_addr = 1007
+    _angle_tolerance_addr = 2007
     
     #: int: address of the controller's resolver turns register
     _resolver_turns_addr = 1012
     
     #: int: address of the controller's resolver position register
-    _resolver_position_addr = 1013
+    _resolver_position_addr = 2013
     
     _time_step = 0.25
 
@@ -157,7 +157,7 @@ class Selector(object):
         if r.isError():
             raise RuntimeError("Could not get current angle")
         else:
-            decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.Big, wordorder=Endian.Little)
+            decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.Big, wordorder=Endian.Big)
             result = decoder.decode_32bit_float()
             return result
 
@@ -170,7 +170,9 @@ class Selector(object):
         if r.isError():
             raise RuntimeError("Could not get current angle error")
         else:
-            return r.registers[0]
+            decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.Big, wordorder=Endian.Big)
+            result = decoder.decode_32bit_float()
+            return result
         
     def get_angle_tolerance(self):
         """Read the current angle tolerance of the wheel from the controller.
@@ -181,7 +183,9 @@ class Selector(object):
         if r.isError():
             raise RuntimeError("Could not get current angle")
         else:
-            return r.registers[0]
+            decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.Big, wordorder=Endian.Big)
+            result = decoder.decode_32bit_float()
+            return result
         
     def get_time(self):
         """Read the time take for the last movement from the controller.
@@ -231,7 +235,9 @@ class Selector(object):
         if r.isError():
             raise RuntimeError("Could not get current _position error")
         else:
-            return r.registers[0]
+            decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.Big, wordorder=Endian.Big)
+            result = decoder.decode_32bit_float()
+            return result
 
     def set_speed(self, speed):
         """Set the speed of motion for the wheel.
