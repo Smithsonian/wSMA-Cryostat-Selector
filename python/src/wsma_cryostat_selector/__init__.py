@@ -26,14 +26,14 @@ class Selector(object):
     #: int: address of the controller's time register.
     _time_addr = 1004
 
-    #: int: address of the controller's angle register (angle in 1/100th degree)
+    #: int: address of the controller's angle register (angle in degrees)
     _angle_addr = 1005
     
-    #: int: address of the controller's angle error register (angular error in 1/100th degree)
+    #: int: address of the controller's angle error register (angular error in degrees)
     _angle_error_addr = 1006
     
-    #: int: address of the controller's angle tolerance register (the allowed angular error in 1/100th degree)
-    _angle_tol_addr = 1007
+    #: int: address of the controller's angle tolerance register (the allowed angular error in degrees)
+    _angle_tolerance_addr = 1007
     
     #: int: address of the controller's resolver turns register
     _resolver_turns_addr = 1012
@@ -53,14 +53,20 @@ class Selector(object):
         #: (:obj:`ModbusTcpClient`): Client for communicating with the controller
         self._client = ModbusTcpClient(ip_address)
 
-        #: int: Current _position of the Selector Wheel
+        #: int: Current position of the Selector Wheel in degrees
         self._position = self.get_position()
 
         #: int: Current speed setting of the Selector Wheel
         self._speed = self.get_speed()
 
-        #: int: Current _position error of the Selector Wheel. Equal to the error in degrees x 100.
-        self._delta = self.get_delta()
+        #: float: Current angle the Selector Wheel in degrees.
+        self._angle = self.get_angle_error()
+
+        #: float: Current angle error of the Selector Wheel in degrees.
+        self._angle_error = self.get_angle_error()
+        
+        #: float: Angle tolerance of the Selector Wheel in degrees before a move is needed.
+        self._angle_tolerance = self.get_angle_tolerance()
 
         #: int: Last movement time in ms.
         self._time = self.get_time()
@@ -79,6 +85,21 @@ class Selector(object):
     def speed(self):
         """int: Speed of the Selector Wheel. Value is one of 1 (slowest) to 3 (fastest)."""
         return self._speed
+
+    @property
+    def angle(self):
+        """float: Angle of the Selector Wheel in degrees."""
+        return self._angle
+
+    @property
+    def angle_error(self):
+        """float: Angle error of the Selector Wheel in degrees."""
+        return self._angle_error
+
+    @property
+    def angle_tolerance(self):
+        """float: Angle tolerance of the Selector Wheel in degrees before a move is needed."""
+        return self._angle
 
     @property
     def time(self):
@@ -124,7 +145,40 @@ class Selector(object):
             raise RuntimeError("Could not get current speed setting")
         else:
             return r.registers[0]
+        
+    def get_angle(self):
+        """Read the current angle of the wheel from the controller.
+        
+        Returns:
+            float: angle in degrees."""
+        r = self._client.read_input_registers(self._angle_addr)
+        if r.isError():
+            raise RuntimeError("Could not get current angle")
+        else:
+            return r.registers[0]
 
+    def get_angle_error(self):
+        """Read the current angle error of the wheel from the controller.
+        
+        Returns:
+            float: angle error in degrees."""
+        r = self._client.read_input_registers(self._angle_error_addr)
+        if r.isError():
+            raise RuntimeError("Could not get current angle error")
+        else:
+            return r.registers[0]
+        
+    def get_angle_tolerance(self):
+        """Read the current angle tolerance of the wheel from the controller.
+        
+        Returns:
+            float: angle in degrees."""
+        r = self._client.read_input_registers(self._angle_tolerance_addr)
+        if r.isError():
+            raise RuntimeError("Could not get current angle")
+        else:
+            return r.registers[0]
+        
     def get_time(self):
         """Read the time take for the last movement from the controller.
         Returns:
@@ -175,8 +229,6 @@ class Selector(object):
         else:
             return r.registers[0]
 
-
-
     def set_speed(self, speed):
         """Set the speed of motion for the wheel.
         Args:
@@ -190,6 +242,22 @@ class Selector(object):
             raise RuntimeError("Could not set speed on controller")
         else:
             self._speed = self.get_speed()
+            
+    def set_angle_tolerance(self, tolerance):
+        """Set the angle error tolerance for the wheel.
+        
+        Args:
+            tolerance (float): Angle error tolerance before a correction move is made in degrees.
+                               Required to be less than 3 degrees (defaults to 0.5 deg on startup)
+        """
+        if tolerance > 3.0:
+            raise ValueError("Requested angle tolerance is too large for receiver")
+
+        w = self._client.write_registers(self._angle_tolerance_addr, tolerance)
+        if w.isError():
+            raise RuntimeError("Could not set angle tolerance on controller")
+        else:
+            self._angle_tolerance = self.get_angle_tolerance()
 
     def set_position(self, position):
         """Set the _position for the wheel.
@@ -210,9 +278,7 @@ class Selector(object):
         while self.get_status():
             sleep(self._time_step/4)
 
-        self._position = self.get_position()
-        self._delta = self.get_delta()
-        self._time = self.get_time()
+        self.update_all()
 
     def home(self):
         """Move the wheel to the home position, and then to position 1.
@@ -227,10 +293,19 @@ class Selector(object):
         while self.get_status():
             sleep(self._time_step/4)
 
-        self._position = self.get_position()
-        self._speed = self.get_speed()
-        self._delta = self.get_delta()
-        self._time = self.get_time()
+        self.update_all()
+        
+    def update_all(self):
+        """Get all status variables from controller."""
+        self.get_command_position()
+        self.get_position()
+        self.get_speed()
+        self.get_angle()
+        self.get_angle_error()
+        self.get_angle_tolerance()
+        self.get_time()
+        self.get_resolver_turns()
+        self.get_resolver_position()
 
 
 class DummySelector(Selector):
