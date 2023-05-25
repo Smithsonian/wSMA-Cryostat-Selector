@@ -21,9 +21,9 @@ A[1]=0                      'Current position
 A[2]=2                      'Speed
 A[3]=0                      'Movement status 1: moving, 0: motion complete
 A[4]=0                      'Time taken for last move
-A[5]=0                      'Current angle in 1/100th degrees
-A[6]=0                      'Current error in 1/100th degrees
-A[7]=50                     'Angle tolerance in 1/100th degrees
+A[5]=0                      'Current angle in degrees
+A[6]=0                      'Current error in degrees
+A[7]=0.5                     'Angle tolerance in 1/100th degrees
 POS[0]=153                  'Position of Position 1 relative to home
 POS[1]=POS[0]+4096          'Position of Position 2 relative to home
 POS[2]=POS[1]+4096          'Position of Position 3 relative to home
@@ -39,7 +39,7 @@ home=0                      'Home position offset in raw_pos units
                         'Motion setup
 rres=16384                  'Resolver resolution
 roffset=rres*8192          'VegaCNC reports the resolver postion from -8192 turns
-rstep=45.1111               'Resolver step to angle conversion factor 1/100th degrees
+rstep=45.1111               'Resolver step to angle conversion factor degrees
 drstep=15.625               'Drive ratio motor step to resolver step
 fastsp=75000                'Fast speed
 fastAC= 150000              'Fast speed acceleration
@@ -67,7 +67,7 @@ ang_err=((raw_pos-setpoint)/rstep)
 IF(com_pos=5);            'Has a home been commanded
 JP#HOME
 ENDIF                      'Simple move commanded
-IF(@ABS(ang_err)>A[6]) 'If position error is larger than commanded error tolerance, move
+IF(@ABS(ang_err)>A[7]) 'If position error is larger than commanded error tolerance, move
 JP#MOVE
 ENDIF
 A[5]=(raw_pos-home)/rstep        'Set the angle output
