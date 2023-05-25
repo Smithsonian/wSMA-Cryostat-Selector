@@ -242,7 +242,7 @@ class Selector(object):
         if position not in range(1, 5):
             raise ValueError("Requested position must be an integer between 1 and 4")
 
-        w = self._client.write_registers(self._setpoint_addr, position)
+        w = self._client.write_registers(self._compos_addr, position)
         if w.isError():
             raise RuntimeError("Could not set position on controller")
 
@@ -257,7 +257,7 @@ class Selector(object):
     def home(self):
         """Move the wheel to the home position, and then to position 1.
         Selector wheel controller automatically homes on power on."""
-        w = self._client.write_registers(self._setpoint_addr, 5)
+        w = self._client.write_registers(self._compos_addr, 5)
         if w.isError():
             raise RuntimeError("Could not request homing procedure")
 
