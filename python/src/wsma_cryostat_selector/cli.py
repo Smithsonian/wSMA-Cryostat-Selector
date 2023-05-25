@@ -78,12 +78,12 @@ def main(args=None):
     if args.verbosity:
         print(f"Time for last move        : {sel.time} ms")
         print(f"Selector speed setting    : {sel.speed}")
-        print(f"Selector angle            : {sel.angle:.2f} deg")
-        print(f"Selector angle error      : {sel.angle_error:.2f} deg")
-        print(f"Selector angle tolerance  : {sel.angle_tolerance:.2f}")
+        print(f"Selector angle            : {sel.angle:.3f} deg")
+        print(f"Selector angle error      : {sel.angle_error:.3f} deg")
+        print(f"Selector angle tolerance  : {sel.angle_tolerance:.3f}")
         
     if args.resolver:
         print(f"Resolver turns count      : {sel.get_resolver_turns()}")
-        print(f"Resolver position      : {sel.get_resolver_position()}")
+        print(f"Resolver position         : {sel.get_resolver_position():.3f}")
         
         
