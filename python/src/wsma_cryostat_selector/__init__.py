@@ -41,7 +41,7 @@ class Selector(object):
     _resolver_turns_addr = 1012
     
     #: int: address of the controller's resolver position register
-    _resolver_position_addr = 2013
+    _resolver_position_addr = 1013
     
     _time_step = 0.25
 
