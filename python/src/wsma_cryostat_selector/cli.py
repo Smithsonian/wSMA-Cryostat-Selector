@@ -84,6 +84,6 @@ def main(args=None):
         
     if args.resolver:
         print(f"Resolver turns count      : {sel.get_resolver_turns()}")
-        print(f"Resolver position         : {sel.get_resolver_position():.3f}")
+        print(f"Resolver position         : {sel.get_resolver_position()}")
         
         
