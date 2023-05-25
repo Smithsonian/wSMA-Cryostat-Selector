@@ -252,9 +252,6 @@ class Selector(object):
         while self.get_status():
             sleep(self._time_step/4)
             
-        # Sleep to allow output arrays to update
-        sleep(0.50)
-
         self.update_all()
 
     def home(self):
@@ -269,9 +266,6 @@ class Selector(object):
         # Wait for motion to complete.
         while self.get_status():
             sleep(self._time_step/4)
-
-        # Sleep to allow output arrays to update
-        sleep(0.50)
 
         self.update_all()
         
