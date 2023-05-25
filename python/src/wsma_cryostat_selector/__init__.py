@@ -253,7 +253,7 @@ class Selector(object):
             sleep(self._time_step/4)
             
         # Sleep to allow output arrays to update
-        sleep(self._time_step)
+        sleep(self._time_step*4)
 
         self.update_all()
 
@@ -271,7 +271,7 @@ class Selector(object):
             sleep(self._time_step/4)
 
         # Sleep to allow output arrays to update
-        sleep(self._time_step)
+        sleep(self._time_step*4)
 
         self.update_all()
         
