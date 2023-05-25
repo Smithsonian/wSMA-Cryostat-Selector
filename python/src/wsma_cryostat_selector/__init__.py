@@ -62,7 +62,7 @@ class Selector(object):
         self._speed = self.get_speed()
 
         #: float: Current angle the Selector Wheel in degrees.
-        self._angle = self.get_angle_error()
+        self._angle = self.get_angle()
 
         #: float: Current angle error of the Selector Wheel in degrees.
         self._angle_error = self.get_angle_error()
@@ -101,7 +101,7 @@ class Selector(object):
     @property
     def angle_tolerance(self):
         """float: Angle tolerance of the Selector Wheel in degrees before a move is needed."""
-        return self._angle
+        return self._angle_tolerance
 
     @property
     def time(self):
@@ -181,7 +181,7 @@ class Selector(object):
             float: angle in degrees."""
         r = self._client.read_input_registers(self._angle_tolerance_addr)
         if r.isError():
-            raise RuntimeError("Could not get current angle")
+            raise RuntimeError("Could not get current angle tolerance")
         else:
             decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.Big, wordorder=Endian.Big)
             result = decoder.decode_32bit_float()
