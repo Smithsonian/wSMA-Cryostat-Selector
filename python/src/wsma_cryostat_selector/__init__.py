@@ -2,6 +2,8 @@ __version__ = '0.0.0'
 
 from time import sleep
 from pymodbus.client.sync import ModbusTcpClient
+from pymodbus.payload import BinaryPayloadDecoder
+from pymodbus.constants import Endian
 
 default_IP = "192.168.42.100"
 
@@ -155,7 +157,9 @@ class Selector(object):
         if r.isError():
             raise RuntimeError("Could not get current angle")
         else:
-            return r.registers[0]
+            decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.Big, wordorder=Endian.Little)
+            result = decoder.decode_32bit_float()
+            return result
 
     def get_angle_error(self):
         """Read the current angle error of the wheel from the controller.
