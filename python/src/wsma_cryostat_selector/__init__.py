@@ -251,6 +251,9 @@ class Selector(object):
         # Wait for motion to complete.
         while self.get_status():
             sleep(self._time_step/4)
+            
+        # Sleep to allow output arrays to update
+        sleep(self._time_step)
 
         self.update_all()
 
@@ -266,6 +269,9 @@ class Selector(object):
         # Wait for motion to complete.
         while self.get_status():
             sleep(self._time_step/4)
+
+        # Sleep to allow output arrays to update
+        sleep(self._time_step)
 
         self.update_all()
         
