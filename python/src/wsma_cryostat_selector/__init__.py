@@ -215,9 +215,7 @@ class Selector(object):
         if r.isError():
             raise RuntimeError("Could not get current _position error")
         else:
-            decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.Big, wordorder=Endian.Big)
-            result = decoder.decode_32bit_float()
-            return result
+            return r.registers[0]
 
     def set_speed(self, speed):
         """Set the speed of motion for the wheel.
