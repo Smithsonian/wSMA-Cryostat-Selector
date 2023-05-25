@@ -197,26 +197,6 @@ class Selector(object):
         else:
             return r.registers[0]
 
-    def get_angle(self):
-        """Read the current position error from the controller.
-        Returns:
-            int: current position error in degrees x 100."""
-        r = self._client.read_input_registers(self._angle_addr)
-        if r.isError():
-            raise RuntimeError("Could not get current _position error")
-        else:
-            return r.registers[0]
-
-    def get_angle_error(self):
-        """Read the current position error from the controller.
-        Returns:
-            int: current position error in degrees x 100."""
-        r = self._client.read_input_registers(self._angle_error_addr)
-        if r.isError():
-            raise RuntimeError("Could not get current _position error")
-        else:
-            return r.registers[0]
-
     def get_resolver_turns(self):
         """Read the current turn count of the resolver.
         Returns:
@@ -252,22 +232,6 @@ class Selector(object):
             raise RuntimeError("Could not set speed on controller")
         else:
             self._speed = self.get_speed()
-            
-    def set_angle_tolerance(self, tolerance):
-        """Set the angle error tolerance for the wheel.
-        
-        Args:
-            tolerance (float): Angle error tolerance before a correction move is made in degrees.
-                               Required to be less than 3 degrees (defaults to 0.5 deg on startup)
-        """
-        if tolerance > 3.0:
-            raise ValueError("Requested angle tolerance is too large for receiver")
-
-        w = self._client.write_registers(self._angle_tolerance_addr, tolerance)
-        if w.isError():
-            raise RuntimeError("Could not set angle tolerance on controller")
-        else:
-            self._angle_tolerance = self.get_angle_tolerance()
 
     def set_position(self, position):
         """Set the _position for the wheel.
