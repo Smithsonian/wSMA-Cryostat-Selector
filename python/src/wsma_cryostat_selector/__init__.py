@@ -381,7 +381,7 @@ class DummySelector(Selector):
         if speed in range(1,4):
             self._speed = speed
         else:
-            raise ValueError("Illegal speed {} passed to Selector.set_speed()".format(position))
+            raise ValueError("Illegal speed {} passed to Selector.set_speed()".format(speed))
 
     def home(self):
         """Move the wheel to the home position, and then to position 1.
