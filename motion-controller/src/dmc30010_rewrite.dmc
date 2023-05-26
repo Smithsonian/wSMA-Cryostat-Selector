@@ -51,6 +51,8 @@ slowsp=10000                'Slow speed for final adjustments (very slow)
 slowAC= 10000               'Slow speed acceleration
 slowDC= 10000               'Slow speed deceleration
 vfastDC= 300000             'Very Fast deceleration
+'Turn motor on
+SHA
 
 #EVENTLP           'Start of Event Loop
 com_pos=A[0]           'Get the commanded position from the Modbus accessible array
