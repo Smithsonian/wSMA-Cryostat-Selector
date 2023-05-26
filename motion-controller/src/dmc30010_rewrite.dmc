@@ -15,7 +15,7 @@ OB1,1                   'Turn on output bit 1, connected to VegaCNC SSI Preset, 
 WT10                    'Wait 10ms
 OB1,0                   'Turn off output bit 1
 WT100
-                        'Initialize arrays
+'Initialize arrays
 A[0]=5                      'Commanded position
 A[1]=0                      'Current position
 A[2]=2                      'Speed
@@ -30,16 +30,16 @@ POS[2]=POS[1]+4096          'Position of Position 3 relative to home
 POS[3]=POS[2]+4096          'Position of Position 4 relative to home
 R[0]=0                      'Resolver turns
 R[1]=1                      'Resolver counts
-                        'Initialize live variables
+'Initialize live variables
 raw_pos=0                   'Current raw position
 ang_err=0                    'Current angle error in 1/100th deg
 calc_mov=0                  'Calculated movement
 setpoint=0                  'Setpoint in resolver units
 home=0                      'Home position offset in raw_pos units
-                        'Motion setup
+'Motion setup
 rres=16384                  'Resolver resolution
 roffset=rres*8192          'VegaCNC reports the resolver postion from -8192 turns
-rstep=45.1111               'Resolver step to angle conversion factor degrees
+rstep=45.1111               'Angle in degrees to resolver step angle conversion factor
 drstep=15.625               'Drive ratio motor step to resolver step
 fastsp=75000                'Fast speed
 fastAC= 150000              'Fast speed acceleration
