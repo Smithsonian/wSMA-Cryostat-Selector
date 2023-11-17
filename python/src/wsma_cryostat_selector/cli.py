@@ -50,6 +50,8 @@ def main(args=None):
     else:
         sel = wsma_cryostat_selector.Selector(ip_address=args.address)
 
+    sel.update_all()
+
     if args.tolerance:
         print(f"Setting angle tolerance to {args.tolerance:.2f} degrees")
         sel.set_angle_tolerance(args.tolerance)
