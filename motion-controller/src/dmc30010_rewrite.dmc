@@ -23,7 +23,7 @@ A[3]=0                      'Movement status 1: moving, 0: motion complete
 A[4]=0                      'Time taken for last move
 A[5]=0                      'Current angle in degrees
 A[6]=0                      'Current error in degrees
-A[7]=0.5                     'Angle tolerance in 1/100th degrees
+A[7]=0.5                    'Angle tolerance in 1/100th degrees
 POS[0]=153                  'Position of Position 1 relative to home
 POS[1]=POS[0]+4096          'Position of Position 2 relative to home
 POS[2]=POS[1]+4096          'Position of Position 3 relative to home
@@ -38,7 +38,7 @@ setpoint=0                  'Setpoint in resolver units
 home=0                      'Home position offset in raw_pos units
 'Motion setup
 rres=16384                  'Resolver resolution
-roffset=rres*8192          'VegaCNC reports the resolver postion from -8192 turns
+roffset=rres*8192           'VegaCNC reports the resolver postion from -8192 turns
 rstep=45.1111               'Angle in degrees to resolver step angle conversion factor
 drstep=15.625               'Drive ratio motor step to resolver step
 fastsp=75000                'Fast speed

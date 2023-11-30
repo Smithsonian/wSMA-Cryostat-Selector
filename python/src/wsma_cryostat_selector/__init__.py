@@ -212,6 +212,20 @@ class Selector(object):
             sleep(self._time_step/4)
             
         self.update_all()
+        
+    def set_angle_tolerance(self, tolerance):
+        """Set the angle tolerance for corrections.
+        
+        Args:
+            tolerance (float): angle tolerance in degrees"""
+        if tolerance < 0.0:
+            tolerance = abs(tolerance)
+
+        w = self._client.write_registers(self._angle_tolerance_addr, tolerance)
+        if w.isError():
+            raise RuntimeError("Could not set angle tolerance on controller")
+        else:
+            self._angle_tolerance = self.get_angle_tolerance()
 
     def home(self):
         """Move the wheel to the home position, and then to position 1.
