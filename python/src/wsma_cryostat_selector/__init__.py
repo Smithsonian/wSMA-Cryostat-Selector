@@ -56,6 +56,10 @@ class Selector(object):
         self._client = ModbusTcpClient(ip_address)
 
         self.update_all()
+        
+    def disconnect(self):
+        """Disconnect from the modbus server"""
+        self._client.disconnect()
 
     @property
     def position(self):
@@ -177,6 +181,20 @@ class Selector(object):
             raise RuntimeError("Could not get current _position error")
         else:
             self._resolver_position = r.registers[0]
+            
+    def update(self, debug=False):
+        """Update all the data from the selector."""
+        self.get_command_position()
+        self.get_position()
+        self.get_speed()
+        self.get_time()
+        self.get_status()
+        self.get_angle()
+        self.get_angle_error()
+        self.get_angle_tolerance()
+        if debug:
+            self.get_resolver_position()
+            self.get_resolver_turns()
 
     def set_speed(self, speed):
         """Set the speed of motion for the wheel.

@@ -23,6 +23,8 @@ class SelectorSmaxService:
         """Service object initialization code"""
         self.logger = self._init_logger()
         
+        self._debug = False
+        
         self.read_config(config)
 
         # Selector object
@@ -63,11 +65,18 @@ class SelectorSmaxService:
         self._selector_data = self._config["selector"]["logged_data"]
         if self._config["selector"]["debug"]:
             self._selector_data.update(self._config["selector"]["debug_data"])
+            self._debug = True
         
         try:
             self.selector = wsma_cryostat_selector.Selector(self._selector_ip, self._selector_port)
+            self.info(f"Connected to selector at {self._selector_ip}:{self._selector_port}")
         except Exception as e:
-            self.logger.error(f"Selector connection exception:\n {e.__str__()}")
+            self.logger.warning(f'First attempt at connecting to selector failed with exception:\n {e.__str__()}\nRetrying...')
+            try:
+                self.selector = wsma_cryostat_selector.Selector(self._selector_ip, self._selector_port)
+                self.info(f"Connected to selector at {self._selector_ip}:{self._selector_port}")
+            except Exception as e:
+                self.logger.error(f"Second attempt at connecting to selector failed with exception:\n {e.__str__()}")
         
     def _init_logger(self):
         logger = logging.getLogger(__name__)
@@ -133,7 +142,7 @@ class SelectorSmaxService:
             if "units" in data.keys():
                 unit = data["units"]
             self._smax_meta["units"][data] = unit
-        if self._config["selector"]["debug"]:
+        if self._debug:
             for data in self._config["selector"]["logged_data"].keys():
                 unit = None
                 if "units" in data.keys():
@@ -163,8 +172,21 @@ class SelectorSmaxService:
         # Gather data
         logged_data = {}
         
-        self.selector.update()
-        
+        try:
+            self.selector.update(self._debug)
+            self.logger.info("Got data from selector.")
+            logged_data['comms_status'] = 'good'
+        except Exception as e:
+            self.logger.warning(f"Failed to get update from selector with exception:\n{e/__str__()}\nRetrying.")
+            try:
+                time.sleep(0.5)
+                self.selector.update(self._debug)
+                self.logger.info("Got data from selector.")
+                logged_data['comms_status'] = 'good'
+            except Exception as e:
+                self.logger.error(f"Failed to get update from selector with exception:\n{e/__str__()}")
+                logged_data['comms_status'] = 'stale'
+            
         # Read the values from the compressor
         for data in self._selector_data.keys():
             reading = self.selector.__getattribute__(data)
@@ -184,7 +206,17 @@ class SelectorSmaxService:
         
         if message.data:
             position = int(message.data)
-            self.selector.set_position(position)
+            try:
+                self.selector.set_position(position)
+                self.logger.info(f'Set selector position to {position}.')
+            except Exception as e:
+                self.logger.warning(f'Failed to set selector position with exception:\n{e/__str__()}\nRetrying...')
+                try:
+                    self.selector.set_position(position)
+                    self.logger.info(f'Set selector position to {position}.')
+                except Exception as e:
+                    self.logger.error(f'Failed to set selector position with exception:\n{e.__str__()}')
+            
             
     def selector_speed_control_callback(self, message):
         """Run on a pubsub notification to smax_table:smax_speed_control_key"""
@@ -192,9 +224,19 @@ class SelectorSmaxService:
         self.logger.info(f'Received PubSub notification for {message.smaxname} from {message.origin} with data {message.data} at {date}')
         
         if message.data:
-            speed = int(message.data)
-            self.selector.set_speed(speed)
-        
+            try:
+                speed = int(message.data)
+                self.selector.set_speed(speed)
+                self.logger.info(f'Set selector speed to {speed}')
+            except Exception as e:
+                self.logger.warning(f'Failed to set selector speed with exception:\n{e.__str__()}\nRetrying...')
+                try:
+                    speed = int(message.data)
+                    self.selector.set_speed(speed)
+                    self.logger.info(f'Set selector speed to {speed}')
+                except Exception as e:
+                    self.logger.error(f'Failed to set selector speed with exception:\n{e.__str__()}\n')
+
     def stop(self):
         """Clean up after the service's main loop"""
         # Tell systemd that we received the stop signal
@@ -209,10 +251,8 @@ class SelectorSmaxService:
         else:
             self.logger.error('SMA-X client not found, nothing to clean up')
             
-        if self.lakeshores:
-            for ls in self.lakeshores:
-                ls.ls._resource.close()
-
+        if self.selector:
+            self.selector.disconnect()
         # Exit to finally stop the serivce
         sys.exit(0)
 
