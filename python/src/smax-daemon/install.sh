@@ -7,15 +7,23 @@
 # 06/29/2023
 #
 
-INSTALL="$HOME/.config/systemd/user/compressor-smax-daemon"
+SYSDUSER="$HOME/.config/systemd/user"
+INSTALL="$SYSDUSER/selector-smax-daemon"
 
 mkdir -p $INSTALL
+mkdir -p "$CONFIG/cryostat/selector"
 
-cp "./compressor-smax-daemon.py" $INSTALL
-cp "./compressor-smax-daemon.service" $INSTALL
+cp "./selector-smax-daemon.py" $INSTALL
+cp "./selector-smax-daemon.service" $SYSDUSER
 cp "./on-start.sh" $INSTALL
-cp "./compressor_config.json" $INSTALL
 
+if ! test -f "$CONFIG/smax_config.json"
+then
+    cp "./smax_config.json" $CONFIG
+fi
+
+cp "./compressor_config.json" "$CONFIG/cryostat/selector"
+cp "./log_keys.conf" "$CONFIG/cryostat/selector"
 
 chmod -R 755 $INSTALL
 

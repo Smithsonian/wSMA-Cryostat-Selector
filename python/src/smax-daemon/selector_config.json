@@ -1,10 +1,7 @@
 {
     "logging_interval":30,
     "smax_config":{
-        "smax_server":"192.168.42.1",
-        "smax_port":6379,
-        "smax_db":0,
-        "smax_table":"antenna:0:receiver:wsma:cryostat",
+        "smax_table":"cryostat",
         "smax_key":"selector",
         "smax_position_control_key":"position_control",
         "smax_speed_control_key":"speed_control"

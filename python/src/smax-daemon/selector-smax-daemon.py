@@ -13,19 +13,22 @@ default_selector_IP = "192.168.42.13"
 default_port = 1
 default_timeout = 10
 
+default_config = "~/wsma_config/cryostat/selector/selector_config.json"
+default_smax_config = "~/wsma_config/smax_config.json"
+
 READY = 'READY=1'
 STOPPING = 'STOPPING=1'
 
 from smax import SmaxRedisClient
 
 class SelectorSmaxService:
-    def __init__(self, config="selector_config.json"):
+    def __init__(self, config=default_config, smax_config=default_smax_config):
         """Service object initialization code"""
         self.logger = self._init_logger()
         
         self._debug = False
         
-        self.read_config(config)
+        self.read_config(config, smax_config)
 
         # Selector object
         self.selector = None
@@ -40,19 +43,30 @@ class SelectorSmaxService:
         # Log that we managed to create the instance
         self.logger.info('Selector-SMAX-Daemon instance created')
         
-    def read_config(self, config):
+    def read_config(self, config, smax_config=None):
         """Read the configuration file."""
         # Read the file
         with open(config) as fp:
             self._config = json.load(fp)
             fp.close()
         
+        # If smax_config is given, update the selector specific config file with the smax_config
+        if smax_config:    
+            with open(smax_config) as fp:
+                s_config = json.load(fp)
+                fp.close()
+            if "smax_table" in self._config["smax_config"]:
+                smax_root = s_config["smax_table"]
+                self._config["smax_config"]["smax_table"] = ":".join(smax_root, self._config["smax_config"]["smax_table"])
+                del s_config["smax_table"]
+            self._config["smax_config"].update(s_config)
+        
         # parse the _config dictionary and set up values
         self.smax_server = self._config["smax_config"]["smax_server"]
         self.smax_port = self._config["smax_config"]["smax_port"]
         self.smax_db = self._config["smax_config"]["smax_db"]
         self.smax_table = self._config["smax_config"]["smax_table"]
-        self.smax_compressor_key = self._config["smax_config"]["smax_key"]
+        self.smax_key = self._config["smax_config"]["smax_key"]
         self.smax_position_control_key = self._config["smax_config"]["smax_position_control_key"]
         self.smax_speed_control_key = self._config["smax_config"]["smax_speed_control_key"]
         
@@ -108,9 +122,9 @@ class SelectorSmaxService:
         
         # Set default values for pubsub channels
         try:
-            self.smax_client.smax_pull(self.smax_table, self.smax_position_control_key)
+            self.smax_client.smax_pull(":".join([self.smax_table, self.smax_key]), self.smax_position_control_key)
         except:
-            self.smax_client.smax_share(self.smax_table, self.smax_position_control_key, self._config["selector"]["default_position"])
+            self.smax_client.smax_share(":".join([self.smax_table, self.smax_key]), self.smax_position_control_key, self._config["selector"]["default_position"])
             self.logger.info(f'Set initial position for selector to {self._config["selector"]["default_position"]}')
 
         try:
@@ -120,8 +134,8 @@ class SelectorSmaxService:
             self.logger.info(f'Set initial speed for selector to {self._config["selector"]["default_speed"]}')
 
         # Register pubsub channels
-        self.smax_client.smax_subscribe(":".join([self.smax_table, self.smax_position_control_key]), self.selector_position_control_callback)
-        self.smax_client.smax_subscribe(":".join([self.smax_table, self.smax_speed_control_key]), self.selector_speed_control_callback)
+        self.smax_client.smax_subscribe(":".join([self.smax_table, self.smax_key, self.smax_position_control_key]), self.selector_position_control_callback)
+        self.smax_client.smax_subscribe(":".join([self.smax_table, self.smax_key, self.smax_speed_control_key]), self.selector_speed_control_callback)
         self.logger.info('Subscribed to selector control pubsub notifications')
 
         # Set up the time for the next logging action
@@ -259,5 +273,6 @@ class SelectorSmaxService:
 
 if __name__ == '__main__':
     # Do start up stuff
-    service = SelectorSmaxService()
+    args = sys.argv[1:]
+    service = SelectorSmaxService(*args)
     service.start()
