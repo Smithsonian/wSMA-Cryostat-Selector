@@ -35,7 +35,7 @@ class Selector(object):
     _angle_error_addr = 2006
     
     #: int: address of the controller's angle error register (angular error in degrees)
-    _angle_tol_addr = 2007
+    _angle_tolerance_addr = 2007
     
     #: int: address of the controller's position 1 setting
     _pos_1_addr = 1008
