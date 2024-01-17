@@ -50,10 +50,10 @@ class Selector(object):
     _pos_4_addr = 1011
     
     #: int: address of the controller's resolver turns register
-    _resolver_turns_addr = 1012
+    _resolver_turns_addr = 2012
     
     #: int: address of the controller's resolver position register
-    _resolver_position_addr = 1013
+    _resolver_position_addr = 2013
     
     _time_step = 0.25
 
@@ -246,15 +246,19 @@ class Selector(object):
         if r.isError():
             raise RuntimeError("Could not get current _position error")
         else:
-            self._resolver_turns = r.registers[0]
-
+            decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.BIG, wordorder=Endian.BIG)
+            result = decoder.decode_32bit_float()
+            self._resolver_turns = result
+            
     def get_resolver_position(self):
         """Read the current position of the resolver."""
         r = self._client.read_input_registers(self._resolver_position_addr)
         if r.isError():
             raise RuntimeError("Could not get current _position error")
         else:
-            self._resolver_position = r.registers[0]
+            decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.BIG, wordorder=Endian.BIG)
+            result = decoder.decode_32bit_float()
+            self._resolver_position = result
             
     def update(self, debug=False):
         """Update all the data from the selector."""
