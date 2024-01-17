@@ -29,13 +29,13 @@ class Selector(object):
     _time_addr = 1004
 
     #: int: address of the controller's angle error register (angular error in degrees)
-    _angle_addr = 1005
+    _angle_addr = 2005
     
     #: int: address of the controller's angle error register (angular error in degrees)
-    _angle_error_addr = 1006
+    _angle_error_addr = 2006
     
     #: int: address of the controller's angle error register (angular error in degrees)
-    _angle_tol_addr = 1007
+    _angle_tol_addr = 2007
     
     #: int: address of the controller's position 1 setting
     _pos_1_addr = 1008
