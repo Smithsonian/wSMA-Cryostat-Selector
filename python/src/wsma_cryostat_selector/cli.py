@@ -86,7 +86,7 @@ def main(args=None):
         print(f"Selector angle error      : {sel.angle_error:.3f} deg")
         print(f"Selector angle tolerance  : {sel.angle_tolerance:.3f}")
         
-    if args.positions:
+    if args.pos:
         print(f"Position 1 location : {sel.pos_1:d}")
         print(f"Position 1 location : {sel.pos_2:d}")
         print(f"Position 1 location : {sel.pos_3:d}")
