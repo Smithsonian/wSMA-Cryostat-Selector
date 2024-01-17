@@ -24,6 +24,8 @@ parser = argparse.ArgumentParser(description="Move the selector wheel to given p
 
 parser.add_argument("-v", "--verbosity", action="store_true",
                     help="Display detailed output from controller")
+parser.add_argument("-p", "--pos", action="store_true",
+                    help="Display the wheel positions.")
 parser.add_argument("-r", "--resolver", action="store_true",
                     help="Display detailed output from resolver")
 parser.add_argument("-a", "--address", default=default_ip,
@@ -83,6 +85,12 @@ def main(args=None):
         print(f"Selector angle            : {sel.angle:.3f} deg")
         print(f"Selector angle error      : {sel.angle_error:.3f} deg")
         print(f"Selector angle tolerance  : {sel.angle_tolerance:.3f}")
+        
+    if args.positions:
+        print(f"Position 1 location : {sel.pos_1:d}")
+        print(f"Position 1 location : {sel.pos_2:d}")
+        print(f"Position 1 location : {sel.pos_3:d}")
+        print(f"Position 1 location : {sel.pos_4:d}")
         
     if args.resolver:
         print(f"Resolver turns count      : {sel.get_resolver_turns()}")

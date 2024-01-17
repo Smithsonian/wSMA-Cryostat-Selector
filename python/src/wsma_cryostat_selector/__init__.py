@@ -107,6 +107,26 @@ class Selector(object):
     def time(self):
         """int: Time taken for last commanded move. Value is the time take in milliseconds."""
         return self._time
+    
+    @property
+    def pos_1(self):
+        """int: Position of 1st selector position"""
+        return self._pos_1
+
+    @property
+    def pos_2(self):
+        """int: Position of 1st selector position"""
+        return self._pos_2
+    
+    @property
+    def pos_3(self):
+        """int: Position of 1st selector position"""
+        return self._pos_3
+    
+    @property
+    def pos_4(self):
+        """int: Position of 1st selector position"""
+        return self._pos_4
 
     def get_command_position(self):
         """Read the commanded position from the controller."""
@@ -123,6 +143,38 @@ class Selector(object):
             raise RuntimeError("Could not get current position")
         else:
             self._position = int(r.registers[0])
+
+    def get_pos_1(self):
+        """Read pos_1 from the controller."""
+        r = self._client.read_input_registers(self._pos_1_addr)
+        if r.isError():
+            raise RuntimeError("Could not get position 1")
+        else:
+            self._pos_1 = int(r.registers[0])
+
+    def get_pos_2(self):
+        """Read pos_2 from the controller."""
+        r = self._client.read_input_registers(self._pos_2_addr)
+        if r.isError():
+            raise RuntimeError("Could not get position 2")
+        else:
+            self._pos_2 = int(r.registers[0])
+
+    def get_pos_3(self):
+        """Read pos_3 from the controller."""
+        r = self._client.read_input_registers(self._pos_3_addr)
+        if r.isError():
+            raise RuntimeError("Could not get position 3")
+        else:
+            self._pos_3 = int(r.registers[0])
+
+    def get_pos_4(self):
+        """Read pos_4 from the controller."""
+        r = self._client.read_input_registers(self._pos_4_addr)
+        if r.isError():
+            raise RuntimeError("Could not get position 4")
+        else:
+            self._pos_4 = int(r.registers[0])
 
     def get_status(self):
         """Read the current status from the controller."""
@@ -205,6 +257,10 @@ class Selector(object):
         self.get_angle_error()
         self.get_angle_tolerance()
         if debug:
+            self.get_pos_1()
+            self.get_pos_2()
+            self.get_pos_3()
+            self.get_pos_4()
             self.get_resolver_position()
             self.get_resolver_turns()
 
@@ -281,6 +337,10 @@ class Selector(object):
         self.get_angle_error()
         self.get_angle_tolerance()
         self.get_time()
+        self.get_pos_1()
+        self.get_pos_2()
+        self.get_pos_3()
+        self.get_pos_4()
         self.get_resolver_turns()
         self.get_resolver_position()
 
