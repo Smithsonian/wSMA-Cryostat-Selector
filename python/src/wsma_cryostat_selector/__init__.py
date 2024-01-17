@@ -127,6 +127,16 @@ class Selector(object):
     def pos_4(self):
         """int: Position of 1st selector position"""
         return self._pos_4
+    
+    @property
+    def resolver_turns(self):
+        """int: Resolver turns"""
+        return self._resolver_turns
+    
+    @property
+    def resolver_position(self):
+        """int: Resolver position"""
+        return self._resolver_position
 
     def get_command_position(self):
         """Read the commanded position from the controller."""
