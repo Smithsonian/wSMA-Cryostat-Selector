@@ -151,13 +151,15 @@ class SelectorSmaxService:
     def smax_set_units(self):
         """Write units to smax - once only."""
         self._smax_meta = {"units":{}}
-        for data in self._config["selector"]["logged_data"].keys():
+        for d in self._config["selector"]["logged_data"].keys():
+            data = self._config["selector"]["logged_data"][d]
             unit = None
             if "units" in data.keys():
                 unit = data["units"]
             self._smax_meta["units"][data] = unit
         if self._debug:
-            for data in self._config["selector"]["logged_data"].keys():
+            for d in self._config["selector"]["logged_data"].keys():
+                data = self._config["selector"]["logged_data"][d]
                 unit = None
                 if "units" in data.keys():
                     unit = data["units"]
