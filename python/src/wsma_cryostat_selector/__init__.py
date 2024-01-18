@@ -325,8 +325,8 @@ class Selector(object):
             wordorder=Endian.BIG,
             byteorder=Endian.BIG
         )
-        registers = builder.add_32bit_float(22.34).to_registers()
-        
+        builder.add_32bit_float(22.34)
+        registers = builder.to_registers()
         w = self._client.write_registers(self._angle_tolerance_addr, registers)
         if w.isError():
             raise RuntimeError("Could not set angle tolerance on controller")
