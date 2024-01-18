@@ -156,14 +156,14 @@ class SelectorSmaxService:
             unit = None
             if "units" in data.keys():
                 unit = data["units"]
-            self._smax_meta["units"][data] = unit
+            self._smax_meta["units"][d] = unit
         if self._debug:
             for d in self._config["selector"]["logged_data"].keys():
                 data = self._config["selector"]["logged_data"][d]
                 unit = None
                 if "units" in data.keys():
                     unit = data["units"]
-                self._smax_meta["units"][data] = unit
+                self._smax_meta["units"][d] = unit
         
         for d in self._smax_meta["units"]:
             self.smax_client.smax_push_meta("units", f"{self.smax_table}:{self.smax_key}:{d}", self._smax_meta["units"][d][1])
