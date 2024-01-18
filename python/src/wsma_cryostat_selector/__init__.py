@@ -325,7 +325,7 @@ class Selector(object):
             wordorder=Endian.BIG,
             byteorder=Endian.BIG
         )
-        builder.add_32bit_float(22.34)
+        builder.add_32bit_float(tolerance)
         registers = builder.to_registers()
         w = self._client.write_registers(self._angle_tolerance_addr, registers)
         if w.isError():
