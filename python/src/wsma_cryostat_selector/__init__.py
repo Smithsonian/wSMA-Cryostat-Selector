@@ -72,6 +72,11 @@ class Selector(object):
     def disconnect(self):
         """Disconnect from the modbus server"""
         self._client.disconnect()
+        
+    @property
+    def command_position(self):
+        """int: Last commanded position of the Selector Wheel. One of 1-5."""
+        return self._command_position
 
     @property
     def position(self):
