@@ -7,7 +7,7 @@
         "smax_speed_control_key":"speed_control"
     },
     "selector":{
-        "ip_address":"192.168.42.13",
+        "ip_address":"selector-p1.proto1.lan",
         "port":502,
         "debug":true,
         "default_position":1,
@@ -17,10 +17,21 @@
             "position":{"type":"int" },
             "status":{"type":"int" },
             "speed":{"type":"int"},
-            "angle":{},
-            "angle_error":{},
-            "angle_tolerance":{},
-            "last_move_time":{}
+            "angle":{
+                "type":"float",
+                "units":"deg"
+            },
+            "angle_error":{
+                "type":"float",
+                "units":"deg"
+            },
+            "angle_tolerance":{
+                "type":"float",
+                "units":"deg"},
+            "last_move_time":{
+                "type":"int",
+                "units":"ms"
+             }
         },
         "debug_data":{
             "resolver_turns":{},

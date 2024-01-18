@@ -9,12 +9,12 @@ import systemd.daemon
 
 import wsma_cryostat_selector
 
-default_selector_IP = "192.168.42.13"
+default_selector_IP = "selector-p1.proto1.lan"
 default_port = 1
 default_timeout = 10
 
-default_config = "~/wsma_config/cryostat/selector/selector_config.json"
-default_smax_config = "~/wsma_config/smax_config.json"
+default_config = "/home/smauser/wsma_config/cryostat/selector/selector_config.json"
+default_smax_config = "/home/smauser/wsma_config/smax_config.json"
 
 READY = 'READY=1'
 STOPPING = 'STOPPING=1'
@@ -82,13 +82,13 @@ class SelectorSmaxService:
             self._debug = True
         
         try:
-            self.selector = wsma_cryostat_selector.Selector(self._selector_ip, self._selector_port)
-            self.info(f"Connected to selector at {self._selector_ip}:{self._selector_port}")
+            self.selector = wsma_cryostat_selector.Selector(self._selector_ip)
+            self.logger.info(f"Connected to selector at {self._selector_ip}:{self._selector_port}")
         except Exception as e:
             self.logger.warning(f'First attempt at connecting to selector failed with exception:\n {e.__str__()}\nRetrying...')
             try:
-                self.selector = wsma_cryostat_selector.Selector(self._selector_ip, self._selector_port)
-                self.info(f"Connected to selector at {self._selector_ip}:{self._selector_port}")
+                self.selector = wsma_cryostat_selector.Selector(self._selector_ip)
+                self.logger.info(f"Connected to selector at {self._selector_ip}:{self._selector_port}")
             except Exception as e:
                 self.logger.error(f"Second attempt at connecting to selector failed with exception:\n {e.__str__()}")
         
@@ -112,7 +112,7 @@ class SelectorSmaxService:
         else:
             self.smax_client.smax_connect_to(self.smax_server, self.smax_port, self.smax_db)
         
-        self.logger.info('SMA-X client connected to {self.smax_server}:{self.smax_port} DB:{self.smx_db}')
+        self.logger.info(f'SMA-X client connected to {self.smax_server}:{self.smax_port} DB:{self.smax_db}')
         
         # Get initial values and push to SMA-X
         self.smax_logging_action()
@@ -191,14 +191,14 @@ class SelectorSmaxService:
             self.logger.info("Got data from selector.")
             logged_data['comms_status'] = 'good'
         except Exception as e:
-            self.logger.warning(f"Failed to get update from selector with exception:\n{e/__str__()}\nRetrying.")
+            self.logger.warning(f"Failed to get update from selector with exception:\n{e.__str__()}\nRetrying.")
             try:
                 time.sleep(0.5)
                 self.selector.update(self._debug)
                 self.logger.info("Got data from selector.")
                 logged_data['comms_status'] = 'good'
             except Exception as e:
-                self.logger.error(f"Failed to get update from selector with exception:\n{e/__str__()}")
+                self.logger.error(f"Failed to get update from selector with exception:\n{e.__str__()}")
                 logged_data['comms_status'] = 'stale'
             
         # Read the values from the compressor
@@ -224,7 +224,7 @@ class SelectorSmaxService:
                 self.selector.set_position(position)
                 self.logger.info(f'Set selector position to {position}.')
             except Exception as e:
-                self.logger.warning(f'Failed to set selector position with exception:\n{e/__str__()}\nRetrying...')
+                self.logger.warning(f'Failed to set selector position with exception:\n{e.__str__()}\nRetrying...')
                 try:
                     self.selector.set_position(position)
                     self.logger.info(f'Set selector position to {position}.')

@@ -59,7 +59,8 @@ setup(
     python_requires='>=3.6',
     install_requires=[
         'pymodbus',
-        'argparse'
+        'argparse',
+        'systemd-python'
     ],
     extras_require={
     },
