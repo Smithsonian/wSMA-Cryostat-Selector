@@ -128,9 +128,9 @@ class SelectorSmaxService:
             self.logger.info(f'Set initial position for selector to {self._config["selector"]["default_position"]}')
 
         try:
-            self.smax_client.smax_pull(self.smax_table, self.smax_speed_control_key)
+            self.smax_client.smax_pull(":".join([self.smax_table, self.smax_key]), self.smax_speed_control_key)
         except:
-            self.smax_client.smax_share(self.smax_table, self.smax_speed_control_key, self._config["selector"]["default_speed"])
+            self.smax_client.smax_share(":".join([self.smax_table, self.smax_key]), self.smax_speed_control_key, self._config["selector"]["default_speed"])
             self.logger.info(f'Set initial speed for selector to {self._config["selector"]["default_speed"]}')
 
         # Register pubsub channels
