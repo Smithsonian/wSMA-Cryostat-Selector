@@ -2,7 +2,7 @@ __version__ = '0.2.0'
 
 from time import sleep
 from pymodbus.client import ModbusTcpClient
-from pymodbus.payload import BinaryPayloadDecoder
+from pymodbus.payload import BinaryPayloadDecoder, BinaryPayloadBuilder
 from pymodbus.constants import Endian
 
 default_IP = "192.168.42.100"
@@ -50,10 +50,10 @@ class Selector(object):
     _pos_4_addr = 1011
     
     #: int: address of the controller's resolver turns register
-    _resolver_turns_addr = 1012
+    _resolver_turns_addr = 2012
     
     #: int: address of the controller's resolver position register
-    _resolver_position_addr = 1013
+    _resolver_position_addr = 2013
     
     _time_step = 0.25
 
@@ -246,7 +246,9 @@ class Selector(object):
         if r.isError():
             raise RuntimeError("Could not get current _position error")
         else:
-            self._resolver_turns = int(r.registers[0])
+            decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.BIG, wordorder=Endian.BIG)
+            result = decoder.decode_32bit_float()
+            self._resolver_turns = result
             
     def get_resolver_position(self):
         """Read the current position of the resolver."""
@@ -254,7 +256,9 @@ class Selector(object):
         if r.isError():
             raise RuntimeError("Could not get current _position error")
         else:
-            self._resolver_position = int(r.registers[0])
+            decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.BIG, wordorder=Endian.BIG)
+            result = decoder.decode_32bit_float()
+            self._resolver_position = result
             
     def update(self, debug=False):
         """Update all the data from the selector."""
@@ -317,7 +321,13 @@ class Selector(object):
         if tolerance < 0.0:
             tolerance = abs(tolerance)
 
-        w = self._client.write_registers(self._angle_tolerance_addr, tolerance)
+        builder = BinaryPayloadBuilder(
+            wordorder=Endian.BIG,
+            byteorder=Endian.BIG
+        )
+        registers = builder.add_32bit_float(22.34).to_registers()
+        
+        w = self._client.write_registers(self._angle_tolerance_addr, registers)
         if w.isError():
             raise RuntimeError("Could not set angle tolerance on controller")
         else:
