@@ -142,6 +142,11 @@ class Selector(object):
     def resolver_position(self):
         """int: Resolver position"""
         return self._resolver_position
+    
+    @property
+    def status(self):
+        """int: Selector Wheel status"""
+        return self._status
 
     def get_command_position(self):
         """Read the commanded position from the controller."""
