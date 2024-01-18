@@ -166,7 +166,7 @@ class SelectorSmaxService:
                 self._smax_meta["units"][d] = unit
         
         for d in self._smax_meta["units"]:
-            self.smax_client.smax_push_meta("units", f"{self.smax_table}:{self.smax_key}:{d}", self._smax_meta["units"][d][1])
+            self.smax_client.smax_push_meta("units", f"{self.smax_table}:{self.smax_key}:{d}", self._smax_meta["units"][d])
         self.logger.info("Wrote selector metadata to SMAX")
 
     def run(self):
