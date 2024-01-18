@@ -13,7 +13,7 @@
         "default_position":1,
         "default_speed":2,
         "logged_data":{
-            "commanded_position":{"type":"int"},
+            "command_position":{"type":"int"},
             "position":{"type":"int" },
             "status":{"type":"int" },
             "speed":{"type":"int"},
@@ -28,7 +28,7 @@
             "angle_tolerance":{
                 "type":"float",
                 "units":"deg"},
-            "last_move_time":{
+            "time":{
                 "type":"int",
                 "units":"ms"
              }
