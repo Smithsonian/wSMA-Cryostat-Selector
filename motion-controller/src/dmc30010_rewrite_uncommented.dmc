@@ -52,8 +52,8 @@ SHA
 com_pos=A[0]
 cur_pos=A[1]
 raw_pos=_TPA - roffset
-R[0] = @INT[raw_pos/rstep]
-R[1] = @INT[raw_pos%rstep]
+R[0] = @INT[raw_pos/rres]
+R[1] = @INT[raw_pos%rres]
 IF(com_pos<=1);setpoint=POS[0];ENDIF
 IF(com_pos=2);setpoint=POS[1];ENDIF
 IF(com_pos=3);setpoint=POS[2];ENDIF
