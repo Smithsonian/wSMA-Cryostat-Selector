@@ -51,6 +51,8 @@ slowsp=10000                'Slow speed for final adjustments (very slow)
 slowAC= 10000               'Slow speed acceleration
 slowDC= 10000               'Slow speed deceleration
 vfastDC= 300000             'Very Fast deceleration
+moves= 0                    'Number of attempts to move to position since last success
+moveslim= 5                 'Maximum number of moves to attempt before rehoming
 'Turn motor on
 SHA
 
@@ -71,9 +73,14 @@ JP#HOME
 ENDIF                      'Simple move commanded
 IF(@ABS(ang_err)>A[7]) 'If position error is larger than commanded error tolerance, move
 JP#MOVE
+ELSE
+moves=0
 ENDIF
 A[5]=(raw_pos-home)/rstep        'Set the angle output
 A[6]=ang_err               'Set the angle error
+IF(moves>moveslim)         'Rehome if we can't get to the requested position
+JP#HOME
+ENDIF
 JP#EVENTLP            'Go back to start of event loop
 EN   'End program
 
@@ -125,7 +132,7 @@ POS[0]=home+153
 POS[1]=POS[0]+4096
 POS[2]=POS[1]+4096
 POS[3]=POS[2]+4096
-A[1]=5
-curr_pos=A[1]
-A[0]=1
+IF(A[0]==5)
+A[0]=A[1]   'Return to last succesful position before home command
+ENDIF
 JP#EVENTLP
