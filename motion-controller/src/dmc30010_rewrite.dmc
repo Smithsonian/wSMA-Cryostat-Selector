@@ -71,7 +71,7 @@ ang_err=((raw_pos-setpoint)/rstep)
 IF(com_pos=5);            'Has a home been commanded
 JP#HOME
 ENDIF                      'Simple move commanded
-IF(@ABS(ang_err)>A[7]) 'If position error is larger than commanded error tolerance, move
+IF(@ABS[ang_err]>A[7]) 'If position error is larger than commanded error tolerance, move
 ccounter=0             'Reset move counter
 JP#MOVE
 ENDIF
@@ -87,7 +87,7 @@ bgtime=TIME                 'Take a time reference
 raw_pos=_TPA - roffset      'Get current position
 raw_mov = raw_pos-setpoint
 calc_mov=@INT[((raw_pos-setpoint)*drstep)]
-IF(@ABS(raw_mov)>1024)      'We are making a position change
+IF(@ABS[raw_mov]>1024)      'We are making a position change
 speed=A[2]                  'Set speed from Modbus array
 IF(speed<=1);SPslowsp;ACslowAC;DCslowDC;ENDIF
 IF(speed=2);SPmedsp;ACmedAC;DCmedDC;ENDIF
@@ -100,7 +100,7 @@ BGA                         'Start the move
 AMA                         'Wait for the move to complete
 raw_pos=_TPA - roffset      
 ang_err = ((raw_pos-setpoint)/rstep)
-IF(@ABS(ang_err)>A[7]
+IF(@ABS[ang_err]>A[7])
 IF(ccounter>maxmoves);JP#HOME;ELSE;JP#MOVE;ENDIF
 ENDIF     'If we are not close enough, move again
           'Rehome if it takes too many attempts
