@@ -1,0 +1,6 @@
+{   
+    "smax_server":"192.168.42.1",
+    "smax_port":6379,
+    "smax_db":0,
+    "smax_table":"antenna:7:receiver:wsma"
+}

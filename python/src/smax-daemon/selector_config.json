@@ -1,0 +1,41 @@
+{
+    "logging_interval":30,
+    "smax_config":{
+        "smax_table":"cryostat",
+        "smax_key":"selector",
+        "smax_position_control_key":"position_control",
+        "smax_speed_control_key":"speed_control"
+    },
+    "selector":{
+        "ip_address":"selector-p1.proto1.lan",
+        "port":502,
+        "debug":true,
+        "default_position":1,
+        "default_speed":2,
+        "logged_data":{
+            "command_position":{"type":"int"},
+            "position":{"type":"int" },
+            "status":{"type":"int" },
+            "speed":{"type":"int"},
+            "angle":{
+                "type":"float",
+                "units":"deg"
+            },
+            "angle_error":{
+                "type":"float",
+                "units":"deg"
+            },
+            "angle_tolerance":{
+                "type":"float",
+                "units":"deg"},
+            "time":{
+                "type":"int",
+                "units":"ms"
+             }
+        },
+        "debug_data":{
+            "resolver_turns":{},
+            "resolver_position":{}
+        }
+    }
+}

@@ -25,7 +25,7 @@ def read(*names, **kwargs):
 
 setup(
     name='wsma-cryostat-selector',
-    version='0.0.1',
+    version='0.2.0',
     license='MIT',
     description='Package for controlling the wSMA Cryostat Selector Wheel',
     author='Paul Grimes',
@@ -59,7 +59,8 @@ setup(
     python_requires='>=3.6',
     install_requires=[
         'pymodbus',
-        'argparse'
+        'argparse',
+        'systemd-python'
     ],
     extras_require={
     },

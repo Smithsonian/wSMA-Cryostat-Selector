@@ -1,7 +1,9 @@
-__version__ = '0.0.0'
+__version__ = '0.2.0'
 
 from time import sleep
-from pymodbus.client.sync import ModbusTcpClient
+from pymodbus.client import ModbusTcpClient
+from pymodbus.payload import BinaryPayloadDecoder, BinaryPayloadBuilder
+from pymodbus.constants import Endian
 
 default_IP = "192.168.42.100"
 
@@ -11,9 +13,12 @@ class Selector(object):
     The SelectorWheel object wraps a pymodbus.ModbusTcpClient instance which
     communicates with the Selector Wheel Controller over TCP/IP.
     """
-    #: int: address of the controller's setpoint register, i.e. the _position of the wheel.
-    _setpoint_addr = 1000
-
+    #: int: address of the controller's commanded register, i.e. the _position of the wheel.
+    _compos_addr = 1000
+    
+    #: int: address of the controller's current position register, i.e. the _position of the wheel
+    _curpos_addr = 1001
+    
     #: int: address of the controller's speed register.
     _speed_addr = 1002
 
@@ -23,9 +28,33 @@ class Selector(object):
     #: int: address of the controller's time register.
     _time_addr = 1004
 
-    #: int: address of the controller's _position error register.
-    _delta_addr = 1005
-
+    #: int: address of the controller's angle error register (angular error in degrees)
+    _angle_addr = 2005
+    
+    #: int: address of the controller's angle error register (angular error in degrees)
+    _angle_error_addr = 2006
+    
+    #: int: address of the controller's angle error register (angular error in degrees)
+    _angle_tolerance_addr = 2007
+    
+    #: int: address of the controller's position 1 setting
+    _pos_1_addr = 1008
+    
+    #: int: address of the controller's position 1 setting
+    _pos_2_addr = 1009
+    
+    #: int: address of the controller's position 1 setting
+    _pos_3_addr = 1010
+    
+    #: int: address of the controller's position 1 setting
+    _pos_4_addr = 1011
+    
+    #: int: address of the controller's resolver turns register
+    _resolver_turns_addr = 2012
+    
+    #: int: address of the controller's resolver position register
+    _resolver_position_addr = 2013
+    
     _time_step = 0.25
 
     def __init__(self, ip_address=default_IP):
@@ -38,17 +67,16 @@ class Selector(object):
         #: (:obj:`ModbusTcpClient`): Client for communicating with the controller
         self._client = ModbusTcpClient(ip_address)
 
-        #: int: Current _position of the Selector Wheel
-        self._position = self.get_position()
-
-        #: int: Current speed setting of the Selector Wheel
-        self._speed = self.get_speed()
-
-        #: int: Current _position error of the Selector Wheel. Equal to the error in degrees x 100.
-        self._delta = self.get_delta()
-
-        #: int: Last movement time in ms.
-        self._time = self.get_time()
+        self.update_all()
+        
+    def disconnect(self):
+        """Disconnect from the modbus server"""
+        self._client.disconnect()
+        
+    @property
+    def command_position(self):
+        """int: Last commanded position of the Selector Wheel. One of 1-5."""
+        return self._command_position
 
     @property
     def position(self):
@@ -56,9 +84,9 @@ class Selector(object):
         return self._position
 
     @property
-    def delta(self):
+    def angle_error(self):
         """int: Position error of the Selector Wheel. Value is error in degrees x 100."""
-        return self._delta
+        return self._angle_error
 
     @property
     def speed(self):
@@ -66,59 +94,199 @@ class Selector(object):
         return self._speed
 
     @property
+    def angle(self):
+        """float: Angle of the Selector Wheel in degrees."""
+        return self._angle
+
+    @property
+    def angle_error(self):
+        """float: Angle error of the Selector Wheel in degrees."""
+        return self._angle_error
+
+    @property
+    def angle_tolerance(self):
+        """float: Angle tolerance of the Selector Wheel in degrees before a move is needed."""
+        return self._angle_tolerance
+
+    @property
     def time(self):
         """int: Time taken for last commanded move. Value is the time take in milliseconds."""
         return self._time
+    
+    @property
+    def pos_1(self):
+        """int: Position of 1st selector position"""
+        return self._pos_1
 
-    def get_position(self):
-        """Read the current setpoint position from the controller.
-        Returns:
-            int: current setpoint position."""
-        r = self._client.read_input_registers(self._setpoint_addr)
+    @property
+    def pos_2(self):
+        """int: Position of 1st selector position"""
+        return self._pos_2
+    
+    @property
+    def pos_3(self):
+        """int: Position of 1st selector position"""
+        return self._pos_3
+    
+    @property
+    def pos_4(self):
+        """int: Position of 1st selector position"""
+        return self._pos_4
+    
+    @property
+    def resolver_turns(self):
+        """int: Resolver turns"""
+        return self._resolver_turns
+    
+    @property
+    def resolver_position(self):
+        """int: Resolver position"""
+        return self._resolver_position
+    
+    @property
+    def status(self):
+        """int: Selector Wheel status"""
+        return self._status
+
+    def get_command_position(self):
+        """Read the commanded position from the controller."""
+        r = self._client.read_input_registers(self._compos_addr)
         if r.isError():
             raise RuntimeError("Could not get current position")
         else:
-            return r.registers[0]
+            self._command_position = int(r.registers[0])
+
+    def get_position(self):
+        """Read the current position from the controller."""
+        r = self._client.read_input_registers(self._curpos_addr)
+        if r.isError():
+            raise RuntimeError("Could not get current position")
+        else:
+            self._position = int(r.registers[0])
+
+    def get_pos_1(self):
+        """Read pos_1 from the controller."""
+        r = self._client.read_input_registers(self._pos_1_addr)
+        if r.isError():
+            raise RuntimeError("Could not get position 1")
+        else:
+            self._pos_1 = int(r.registers[0])
+
+    def get_pos_2(self):
+        """Read pos_2 from the controller."""
+        r = self._client.read_input_registers(self._pos_2_addr)
+        if r.isError():
+            raise RuntimeError("Could not get position 2")
+        else:
+            self._pos_2 = int(r.registers[0])
+
+    def get_pos_3(self):
+        """Read pos_3 from the controller."""
+        r = self._client.read_input_registers(self._pos_3_addr)
+        if r.isError():
+            raise RuntimeError("Could not get position 3")
+        else:
+            self._pos_3 = int(r.registers[0])
+
+    def get_pos_4(self):
+        """Read pos_4 from the controller."""
+        r = self._client.read_input_registers(self._pos_4_addr)
+        if r.isError():
+            raise RuntimeError("Could not get position 4")
+        else:
+            self._pos_4 = int(r.registers[0])
 
     def get_status(self):
-        """Read the current status from the controller.
-        Returns:
-            int: current status. Either 1 for motion in progress or 0 for motion complete."""
+        """Read the current status from the controller."""
         r = self._client.read_input_registers(self._retcode_addr)
         if r.isError():
             raise RuntimeError("Could not get current status")
         else:
-            return r.registers[0]
+            self._status = int(r.registers[0])
 
     def get_speed(self):
-        """Read the current speed setting from the controller.
-        Returns:
-            int: current speed setting."""
+        """Read the current speed setting from the controller."""
         r = self._client.read_input_registers(self._speed_addr)
         if r.isError():
             raise RuntimeError("Could not get current speed setting")
         else:
-            return r.registers[0]
-
-    def get_delta(self):
-        """Read the current position error from the controller.
-        Returns:
-            int: current position error in degrees x 100."""
-        r = self._client.read_input_registers(self._delta_addr)
+            self._speed = int(r.registers[0])
+        
+    def get_angle(self):
+        """Read the current angle of the wheel from the controller."""
+        r = self._client.read_input_registers(self._angle_addr)
         if r.isError():
-            raise RuntimeError("Could not get current _position error")
+            raise RuntimeError("Could not get current angle")
         else:
-            return r.registers[0]
+            decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.BIG, wordorder=Endian.BIG)
+            result = decoder.decode_32bit_float()
+            self._angle = result
 
+    def get_angle_error(self):
+        """Read the current angle error of the wheel from the controller."""
+        r = self._client.read_input_registers(self._angle_error_addr)
+        if r.isError():
+            raise RuntimeError("Could not get current angle error")
+        else:
+            decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.BIG, wordorder=Endian.BIG)
+            result = decoder.decode_32bit_float()
+            self._angle_error = result
+        
+    def get_angle_tolerance(self):
+        """Read the current angle tolerance of the wheel from the controller."""
+        r = self._client.read_input_registers(self._angle_tolerance_addr)
+        if r.isError():
+            raise RuntimeError("Could not get current angle tolerance")
+        else:
+            decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.BIG, wordorder=Endian.BIG)
+            result = decoder.decode_32bit_float()
+            self._angle_tolerance = result
+        
     def get_time(self):
-        """Read the time take for the last movement from the controller.
-        Returns:
-            int: time taken for the last move in milliseconds."""
+        """Read the time take for the last movement from the controller."""
         r = self._client.read_input_registers(self._time_addr)
         if r.isError():
             raise RuntimeError("Could not get last movement time")
         else:
-            return r.registers[0]
+            self._time = int(r.registers[0])
+
+    def get_resolver_turns(self):
+        """Read the current turn count of the resolver."""
+        r = self._client.read_input_registers(self._resolver_turns_addr)
+        if r.isError():
+            raise RuntimeError("Could not get current _position error")
+        else:
+            decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.BIG, wordorder=Endian.BIG)
+            result = decoder.decode_32bit_float()
+            self._resolver_turns = result
+            
+    def get_resolver_position(self):
+        """Read the current position of the resolver."""
+        r = self._client.read_input_registers(self._resolver_position_addr)
+        if r.isError():
+            raise RuntimeError("Could not get current _position error")
+        else:
+            decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.BIG, wordorder=Endian.BIG)
+            result = decoder.decode_32bit_float()
+            self._resolver_position = result
+            
+    def update(self, debug=False):
+        """Update all the data from the selector."""
+        self.get_command_position()
+        self.get_position()
+        self.get_speed()
+        self.get_time()
+        self.get_status()
+        self.get_angle()
+        self.get_angle_error()
+        self.get_angle_tolerance()
+        if debug:
+            self.get_pos_1()
+            self.get_pos_2()
+            self.get_pos_3()
+            self.get_pos_4()
+            self.get_resolver_position()
+            self.get_resolver_turns()
 
     def set_speed(self, speed):
         """Set the speed of motion for the wheel.
@@ -143,24 +311,42 @@ class Selector(object):
         if position not in range(1, 5):
             raise ValueError("Requested position must be an integer between 1 and 4")
 
-        w = self._client.write_registers(self._setpoint_addr, position)
+        w = self._client.write_registers(self._compos_addr, position)
         if w.isError():
             raise RuntimeError("Could not set position on controller")
 
         # Sleep to allow motion to start
-        sleep(self._time_step/4)
+        sleep(self._time_step/2)
         # Wait for motion to complete.
         while self.get_status():
             sleep(self._time_step/4)
+            
+        self.update_all()
+        
+    def set_angle_tolerance(self, tolerance):
+        """Set the angle tolerance for corrections.
+        
+        Args:
+            tolerance (float): angle tolerance in degrees"""
+        if tolerance < 0.0:
+            tolerance = abs(tolerance)
 
-        self._position = self.get_position()
-        self._delta = self.get_delta()
-        self._time = self.get_time()
+        builder = BinaryPayloadBuilder(
+            wordorder=Endian.BIG,
+            byteorder=Endian.BIG
+        )
+        builder.add_32bit_float(tolerance)
+        registers = builder.to_registers()
+        w = self._client.write_registers(self._angle_tolerance_addr, registers)
+        if w.isError():
+            raise RuntimeError("Could not set angle tolerance on controller")
+        else:
+            self._angle_tolerance = self.get_angle_tolerance()
 
     def home(self):
         """Move the wheel to the home position, and then to position 1.
         Selector wheel controller automatically homes on power on."""
-        w = self._client.write_registers(self._setpoint_addr, 5)
+        w = self._client.write_registers(self._compos_addr, 5)
         if w.isError():
             raise RuntimeError("Could not request homing procedure")
 
@@ -170,10 +356,23 @@ class Selector(object):
         while self.get_status():
             sleep(self._time_step/4)
 
-        self._position = self.get_position()
-        self._speed = self.get_speed()
-        self._delta = self.get_delta()
-        self._time = self.get_time()
+        self.update_all()
+        
+    def update_all(self):
+        """Get all status variables from controller."""
+        self.get_command_position()
+        self.get_position()
+        self.get_speed()
+        self.get_angle()
+        self.get_angle_error()
+        self.get_angle_tolerance()
+        self.get_time()
+        self.get_pos_1()
+        self.get_pos_2()
+        self.get_pos_3()
+        self.get_pos_4()
+        self.get_resolver_turns()
+        self.get_resolver_position()
 
 
 class DummySelector(Selector):
@@ -186,7 +385,7 @@ class DummySelector(Selector):
         """
         self._position = 1
         self._speed = 1
-        self._delta = 42
+        self._angle_error = 42
         self._time = 35
 
     def get_position(self):
@@ -199,19 +398,19 @@ class DummySelector(Selector):
         """Read the current speed setting from self._speed
         Returns:
             int: current speed setting."""
-        return self._speed
+        pass
 
     def get_status(self):
         """Read the current status from the controller. Dummy version is always 0.
         Returns:
             int: current status. Either 1 for motion in progress or 0 for motion complete."""
-        return 0
+        self._status = 0
 
-    def get_delta(self):
-        """Read the current position error from self._delta.
+    def get_angle_error(self):
+        """Read the current position error from self._angle_error.
         Returns:
             int: current position error in degrees x 100."""
-        return self._delta
+        return self._angle_error
 
     def get_time(self):
         """Read the time take for the last movement from self._time.
@@ -221,13 +420,13 @@ class DummySelector(Selector):
 
     def set_position(self, position):
         """Set the _position for the wheel.
-        Dummy version changes the position and increments _delta by the speed
+        Dummy version changes the position and increments _angle_error by the speed
         Args:
             position (int): Position setting. One of 1, 2, 3, or 4.
         """
         if position in range(1,5):
             self._position = position
-            self._delta = self._delta + self._speed
+            self._angle_error = self._angle_error + self._speed
         else:
             raise ValueError("Illegal position {} passed to Selector.set_position()".format(position))
 
@@ -239,14 +438,14 @@ class DummySelector(Selector):
         if speed in range(1,4):
             self._speed = speed
         else:
-            raise ValueError("Illegal speed {} passed to Selector.set_speed()".format(position))
+            raise ValueError("Illegal speed {} passed to Selector.set_speed()".format(speed))
 
     def home(self):
         """Move the wheel to the home position, and then to position 1.
         Also sets speed to 1.
-        Dummy version sets position to 1, speed to 1 and resets delta
+        Dummy version sets position to 1, speed to 1 and resets angle_error
         Selector wheel controller automatically homes on power on."""
         self._position = 1
         self._speed = 1
-        self._delta = 42
+        self._angle_error = 42
 

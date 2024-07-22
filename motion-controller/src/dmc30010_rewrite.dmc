@@ -1,0 +1,138 @@
+#AUTO                'Run from this point on start up
+WT1000                  'Wait 1 second to avoid a race condition with the VegaCNC Resolver to Encoder
+#SETUP               'Start set up code
+SIA=1,29,14,-1<10>1     'Configure SSI interface to resolver for axis A
+YCA=16384               'Set axis A encoder steps per cycle - note that this is one turn of the selector wheel, or 8 turns of the stepper motor
+MT-2.5                  'Set Motor Type to Stepper Motor, reversed direction, active high pulses
+LCA=-15                 'Set Low Current Stepper Mode - go to low current 15 samples after end of motion
+DMA[8]                  'Dimension Array A for control and reporting
+DMPOS[4]                'Dimension Array POS for storing position data
+DMR[2]                  'Dimension Array R for monitoring resolver - temporary to debug resolver issues
+ME1                     'Modbus array write enable
+
+#init                'Start init code
+OB1,1                   'Turn on output bit 1, connected to VegaCNC SSI Preset, in order to reset turn counter
+WT10                    'Wait 10ms
+OB1,0                   'Turn off output bit 1
+WT100
+'Initialize arrays
+A[0]=5                      'Commanded position
+A[1]=0                      'Current position
+A[2]=2                      'Speed
+A[3]=0                      'Movement status 1: moving, 0: motion complete
+A[4]=0                      'Time taken for last move
+A[5]=0                      'Current angle in degrees
+A[6]=0                      'Current error in degrees
+A[7]=0.5                    'Angle tolerance in 1/100th degrees
+POS[0]=153                  'Position of Position 1 relative to home
+POS[1]=POS[0]+4096          'Position of Position 2 relative to home
+POS[2]=POS[1]+4096          'Position of Position 3 relative to home
+POS[3]=POS[2]+4096          'Position of Position 4 relative to home
+R[0]=0                      'Resolver turns
+R[1]=1                      'Resolver counts
+'Initialize live variables
+raw_pos=0                   'Current raw position
+ang_err=0                   'Current angle error in 1/100th deg
+calc_mov=0                  'Calculated movement
+setpoint=0                  'Setpoint in resolver units
+home=0                      'Home position offset in raw_pos units
+ccounter=0                  'Keep track of how many attempts to correct position have been made without success
+maxmoves=5                  'Maximum number of moves to attempt before rehoming
+'Motion setup
+rres=16384                  'Resolver resolution
+roffset=rres*8192           'VegaCNC reports the resolver postion from -8192 turns
+rstep=45.1111               'Angle in degrees to resolver step angle conversion factor
+drstep=15.625               'Drive ratio motor step to resolver step
+fastsp=75000                'Fast speed
+fastAC= 150000              'Fast speed acceleration
+fastDC= 150000              'Fast speed deceleration
+medsp=30000                 'Medium speed
+medAC= 50000                'Medium speed acceleration
+medDC= 50000                'Medium speed deceleration
+slowsp=10000                'Slow speed for final adjustments (very slow)
+slowAC= 10000               'Slow speed acceleration
+slowDC= 10000               'Slow speed deceleration
+vfastDC= 300000             'Very Fast deceleration
+'Turn motor on
+SHA
+
+#EVENTLP           'Start of Event Loop
+com_pos=A[0]           'Get the commanded position from the Modbus accessible array
+cur_pos=A[1]           'Get the last set position from the Modbus accessible array
+raw_pos=_TPA - roffset 'Get current position
+R[0] = @INT[raw_pos/rstep]  'Update resolver turn counts Modbus array
+R[1] = @INT[raw_pos%rstep]       'Update resolver position counts Modbus array
+IF(com_pos<=1);setpoint=POS[0];ENDIF   'Set the setpoint to the current commanded position
+IF(com_pos=2);setpoint=POS[1];ENDIF
+IF(com_pos=3);setpoint=POS[2];ENDIF
+IF(com_pos=4);setpoint=POS[3];ENDIF
+IF(com_pos>6);setpoint=POS[3];ENDIF    'Default to last position on nonsense position - Do we really want this?
+ang_err=((raw_pos-setpoint)/rstep)
+IF(com_pos=5);            'Has a home been commanded
+JP#HOME
+ENDIF                      'Simple move commanded
+IF(@ABS[ang_err]>A[7]) 'If position error is larger than commanded error tolerance, move
+ccounter=0             'Reset move counter
+JP#MOVE
+ENDIF
+A[5]=(raw_pos-home)/rstep        'Set the angle output
+A[6]=ang_err               'Set the angle error
+JP#EVENTLP            'Go back to start of event loop
+EN   'End program
+
+#MOVE                 'Start of move command subroutine
+ccounter+=1
+A[3]=1                      'Set status to "moving"
+bgtime=TIME                 'Take a time reference
+raw_pos=_TPA - roffset      'Get current position
+raw_mov = raw_pos-setpoint
+calc_mov=@INT[((raw_pos-setpoint)*drstep)]
+IF(@ABS[raw_mov]>1024)      'We are making a position change
+speed=A[2]                  'Set speed from Modbus array
+IF(speed<=1);SPslowsp;ACslowAC;DCslowDC;ENDIF
+IF(speed=2);SPmedsp;ACmedAC;DCmedDC;ENDIF
+IF(speed>=3);SPfastsp;ACfastAC;DCfastDC;ENDIF
+ELSE                        'We are making a correction
+SPslowsp;ACslowAC;DCslowDC
+ENDIF
+PRcalc_mov                  'Command the move
+BGA                         'Start the move
+AMA                         'Wait for the move to complete
+raw_pos=_TPA - roffset      
+ang_err = ((raw_pos-setpoint)/rstep)
+IF(@ABS[ang_err]>A[7])
+IF(ccounter>maxmoves);JP#HOME;ELSE;JP#MOVE;ENDIF
+ENDIF     'If we are not close enough, move again
+          'Rehome if it takes too many attempts
+endtime=TIME
+deltaT=endtime-bgtime
+A[4]=deltaT                 'Set the status array
+A[1]=A[0]
+A[3]=0
+A[5]=(raw_pos-home)/rstep
+A[6]=ang_err
+JP#EVENTLP
+
+#HOME               'Start of the home loop
+prev_pos=A[1]
+IF(prev_pos==0);prev_pos=1;ENDIF 'On startup, default to position 1
+A[3]=1                  'Set status to "moving"
+SPslowsp;ACslowAC;DCvfastDC  'Set slow speeds and fast deceleration
+HMA                     'Order the home
+bgtime=TIME
+BGA                     'Start the home
+AMA                     'Wait for motion to complete
+OB1,1                   'Reset the VegaCNC turn counter
+WT10
+OB1,0
+WT100
+endtime=TIME
+deltaT=endtime-bgtime
+A[4]=deltaT
+home=_TPA - roffset   'Set the positions
+POS[0]=home+153
+POS[1]=POS[0]+4096
+POS[2]=POS[1]+4096
+POS[3]=POS[2]+4096
+A[0]=prev_pos         'Command a move back to previously commanded position
+JP#EVENTLP

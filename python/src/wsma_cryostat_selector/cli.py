@@ -24,6 +24,10 @@ parser = argparse.ArgumentParser(description="Move the selector wheel to given p
 
 parser.add_argument("-v", "--verbosity", action="store_true",
                     help="Display detailed output from controller")
+parser.add_argument("-p", "--pos", action="store_true",
+                    help="Display the wheel positions.")
+parser.add_argument("-r", "--resolver", action="store_true",
+                    help="Display detailed output from resolver")
 parser.add_argument("-a", "--address", default=default_ip,
                     help="The IP address of the controller")
 parser.add_argument("-0", "--home", action="store_true",
@@ -31,8 +35,10 @@ parser.add_argument("-0", "--home", action="store_true",
                          "Will move to position 1 after completion of homing operation "
                          "and then to requested position if given.")
 parser.add_argument("-s", "--speed", type=int, choices=[1,2,3],
-                    help="Speed to move at. "
+                    help="Set the speed to move at. "
                          "Does not affect the speed of homing operations.")
+parser.add_argument("-t", "--tolerance", type=float,
+                    help="Set the angular position tolerance for the wheel in degrees")
 parser.add_argument("position", type=int, choices=[1,2,3,4], nargs="?",
                     help="The wheel position to move to.")
 
@@ -46,6 +52,12 @@ def main(args=None):
     else:
         sel = wsma_cryostat_selector.Selector(ip_address=args.address)
 
+    sel.update_all()
+
+    if args.tolerance:
+        print(f"Setting angle tolerance to {args.tolerance:.2f} degrees")
+        sel.set_angle_tolerance(args.tolerance)
+
     if args.home:
         print("Homing selector.")
         speed = sel.speed
@@ -56,18 +68,32 @@ def main(args=None):
 
     if args.speed:
         if args.verbosity:
-            print("Setting speed to {}".format(args.speed))
+            print(f"Setting speed to {args.speed}")
         sel.set_speed(args.speed)
 
     if args.position:
-        print("Moving to position {}".format(args.position))
+        print(f"Moving to position {args.position}")
         sel.set_position(args.position)
         if args.verbosity:
             print("Done")
     else:
-        print("Current selector position : {}".format(sel.position))
+        print(f"Current selector position : {sel.position}")
 
     if args.verbosity:
-        print("Selector speed setting    : {}".format(sel.speed))
-        print("Selector position error   : {:.2f} deg".format(sel.delta))
-        print("Time for last move        : {} ms".format(sel.time))
+        print(f"Time for last move        : {sel.time} ms")
+        print(f"Selector speed setting    : {sel.speed}")
+        print(f"Selector angle            : {sel.angle:.3f} deg")
+        print(f"Selector angle error      : {sel.angle_error:.3f} deg")
+        print(f"Selector angle tolerance  : {sel.angle_tolerance:.3f}")
+        
+    if args.pos:
+        print(f"Position 1 location : {sel.pos_1:d}")
+        print(f"Position 1 location : {sel.pos_2:d}")
+        print(f"Position 1 location : {sel.pos_3:d}")
+        print(f"Position 1 location : {sel.pos_4:d}")
+        
+    if args.resolver:
+        print(f"Resolver turns count      : {sel.resolver_turns}")
+        print(f"Resolver position         : {sel.resolver_position}")
+        
+        
