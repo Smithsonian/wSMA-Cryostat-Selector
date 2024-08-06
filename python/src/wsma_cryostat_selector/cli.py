@@ -14,10 +14,14 @@ Why does this file exist, and why not put this in __main__?
 
   Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
+import os
 import argparse
 import wsma_cryostat_selector
 
 default_ip = '192.168.42.100'
+
+if "WSMASELECTOR" in os.environ:
+    default_ip = os.environ['WSMASELECTOR']
 
 parser = argparse.ArgumentParser(description="Move the selector wheel to given position, "
                                              "or print current position.")
@@ -88,9 +92,9 @@ def main(args=None):
         
     if args.pos:
         print(f"Position 1 location : {sel.pos_1:d}")
-        print(f"Position 1 location : {sel.pos_2:d}")
-        print(f"Position 1 location : {sel.pos_3:d}")
-        print(f"Position 1 location : {sel.pos_4:d}")
+        print(f"Position 2 location : {sel.pos_2:d}")
+        print(f"Position 3 location : {sel.pos_3:d}")
+        print(f"Position 4 location : {sel.pos_4:d}")
         
     if args.resolver:
         print(f"Resolver turns count      : {sel.resolver_turns}")

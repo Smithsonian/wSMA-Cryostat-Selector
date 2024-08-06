@@ -40,13 +40,13 @@ class Selector(object):
     #: int: address of the controller's position 1 setting
     _pos_1_addr = 1008
     
-    #: int: address of the controller's position 1 setting
+    #: int: address of the controller's position 2 setting
     _pos_2_addr = 1009
     
-    #: int: address of the controller's position 1 setting
+    #: int: address of the controller's position 3 setting
     _pos_3_addr = 1010
     
-    #: int: address of the controller's position 1 setting
+    #: int: address of the controller's position 4 setting
     _pos_4_addr = 1011
     
     #: int: address of the controller's resolver turns register
