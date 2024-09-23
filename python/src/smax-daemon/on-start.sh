@@ -1,5 +1,5 @@
 #!/bin/bash
-source $HOME/.bashrc
-micromamba activate selector # change to your conda environment's name
-# -u: unbuffered output
-python -u $HOME/.config/systemd/user/selector-smax-daemon/selector-smax-daemon.py
+CONDA_PREFIX='/opt/mamba';
+CONDA_ENV='selector_smax_daemon';
+
+eval "$CONDA_PREFIX/envs/$CONDA_ENV/bin/python selector_smax_daemon.py";

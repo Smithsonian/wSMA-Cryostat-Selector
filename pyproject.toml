@@ -1,0 +1,32 @@
+[build-system]
+# Minimum requirements for the build system to execute.
+requires = ["setuptools", "wheel"]  # PEP 508 specifications.
+
+[tool.setuptools.packages.find]
+# All the following settings are optional:
+where = ['src']  # ['.'] by default
+include = ['*']  # ['*'] by default
+exclude = ['tests*', 
+           'smax_daemon']
+
+[project]
+name = 'wsma_cryostat_selector'
+authors = [{name="Paul Grimes", email="pgrimes@cfa.harvard.edu"}]
+description = 'wSMA cryostat selector system daemon'
+readme = 'README.md'
+requires-python = '>=3.7'
+license = {text = 'MIT License'}
+dependencies = [
+    'pymodbus',
+    'systemd-python',
+    'retrying',
+    'argparse',
+    'smax @ https://github.com/Smithsonian/smax-python/archive/refs/tags/v1.0.3.zip'
+]
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = {attr = "wsma_cryostat_selector.__version__"}
+
+[project.scripts]
+selector = "wsma_cryostat_selector.cli:main"

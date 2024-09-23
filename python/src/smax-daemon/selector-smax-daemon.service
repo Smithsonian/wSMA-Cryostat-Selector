@@ -1,13 +1,16 @@
 [Unit]
 Description=Selector SMAX Daemon
+After=network-online.target
+After=multi-user.target
+Requires=network-online.target
 
 [Service]
 Type=notify
 NotifyAccess=all
+User=smauser
 Environment=PYTHONUNBUFFERED=1
-KillSignal=SIGINT
-WorkingDirectory=/home/smauser/.config/systemd/user/selector-smax-daemon
-ExecStart=/home/smauser/.config/systemd/user/selector-smax-daemon/on-start.sh
+WorkingDirectory=/usr/local/lib/selector_smax_daemon
+ExecStart=/usr/local/lib/selector_smax_daemon/on_start.sh
 
 [Install]
 WantedBy=default.target
