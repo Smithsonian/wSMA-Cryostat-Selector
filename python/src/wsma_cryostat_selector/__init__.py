@@ -147,10 +147,13 @@ class Selector(object):
     def status(self):
         """int: Selector Wheel status"""
         return self._status
+    
+    def _read_registers(self, register):
+        return self._client.read_input_registers(register, 1, 1)
 
     def get_command_position(self):
         """Read the commanded position from the controller."""
-        r = self._client.read_input_registers(self._compos_addr)
+        r = self._read_registers(self._compos_addr)
         if r.isError():
             raise RuntimeError("Could not get current position")
         else:
@@ -158,7 +161,7 @@ class Selector(object):
 
     def get_position(self):
         """Read the current position from the controller."""
-        r = self._client.read_input_registers(self._curpos_addr)
+        r = self._read_registers(self._curpos_addr)
         if r.isError():
             raise RuntimeError("Could not get current position")
         else:
@@ -166,7 +169,7 @@ class Selector(object):
 
     def get_pos_1(self):
         """Read pos_1 from the controller."""
-        r = self._client.read_input_registers(self._pos_1_addr)
+        r = self._read_registers(self._pos_1_addr)
         if r.isError():
             raise RuntimeError("Could not get position 1")
         else:
@@ -174,7 +177,7 @@ class Selector(object):
 
     def get_pos_2(self):
         """Read pos_2 from the controller."""
-        r = self._client.read_input_registers(self._pos_2_addr)
+        r = self._read_registers(self._pos_2_addr)
         if r.isError():
             raise RuntimeError("Could not get position 2")
         else:
@@ -182,7 +185,7 @@ class Selector(object):
 
     def get_pos_3(self):
         """Read pos_3 from the controller."""
-        r = self._client.read_input_registers(self._pos_3_addr)
+        r = self._read_registers(self._pos_3_addr)
         if r.isError():
             raise RuntimeError("Could not get position 3")
         else:
@@ -190,7 +193,7 @@ class Selector(object):
 
     def get_pos_4(self):
         """Read pos_4 from the controller."""
-        r = self._client.read_input_registers(self._pos_4_addr)
+        r = self._read_registers(self._pos_4_addr)
         if r.isError():
             raise RuntimeError("Could not get position 4")
         else:
@@ -198,7 +201,7 @@ class Selector(object):
 
     def get_status(self):
         """Read the current status from the controller."""
-        r = self._client.read_input_registers(self._retcode_addr)
+        r = self._read_registers(self._retcode_addr)
         if r.isError():
             raise RuntimeError("Could not get current status")
         else:
@@ -206,7 +209,7 @@ class Selector(object):
 
     def get_speed(self):
         """Read the current speed setting from the controller."""
-        r = self._client.read_input_registers(self._speed_addr)
+        r = self._read_registers(self._speed_addr)
         if r.isError():
             raise RuntimeError("Could not get current speed setting")
         else:
@@ -214,7 +217,7 @@ class Selector(object):
         
     def get_angle(self):
         """Read the current angle of the wheel from the controller."""
-        r = self._client.read_input_registers(self._angle_addr)
+        r = self._read_registers(self._angle_addr)
         if r.isError():
             raise RuntimeError("Could not get current angle")
         else:
@@ -224,7 +227,7 @@ class Selector(object):
 
     def get_angle_error(self):
         """Read the current angle error of the wheel from the controller."""
-        r = self._client.read_input_registers(self._angle_error_addr)
+        r = self._read_registers(self._angle_error_addr)
         if r.isError():
             raise RuntimeError("Could not get current angle error")
         else:
@@ -234,7 +237,7 @@ class Selector(object):
         
     def get_angle_tolerance(self):
         """Read the current angle tolerance of the wheel from the controller."""
-        r = self._client.read_input_registers(self._angle_tolerance_addr)
+        r = self._read_registers(self._angle_tolerance_addr)
         if r.isError():
             raise RuntimeError("Could not get current angle tolerance")
         else:
@@ -244,7 +247,7 @@ class Selector(object):
         
     def get_time(self):
         """Read the time take for the last movement from the controller."""
-        r = self._client.read_input_registers(self._time_addr)
+        r = self._read_registers(self._time_addr)
         if r.isError():
             raise RuntimeError("Could not get last movement time")
         else:
@@ -252,7 +255,7 @@ class Selector(object):
 
     def get_resolver_turns(self):
         """Read the current turn count of the resolver."""
-        r = self._client.read_input_registers(self._resolver_turns_addr)
+        r = self._read_registers(self._resolver_turns_addr)
         if r.isError():
             raise RuntimeError("Could not get current _position error")
         else:
@@ -262,7 +265,7 @@ class Selector(object):
             
     def get_resolver_position(self):
         """Read the current position of the resolver."""
-        r = self._client.read_input_registers(self._resolver_position_addr)
+        r = self._read_registers(self._resolver_position_addr)
         if r.isError():
             raise RuntimeError("Could not get current _position error")
         else:
@@ -296,7 +299,7 @@ class Selector(object):
         if speed not in range(1,4):
             raise ValueError("Speed must be an integer between 1 and 3")
 
-        w = self._client.write_registers(self._speed_addr, speed)
+        w = self._client.write_registers(self._speed_addr, speed, slave=1)
         if w.isError():
             raise RuntimeError("Could not set speed on controller")
         else:
@@ -311,7 +314,7 @@ class Selector(object):
         if position not in range(1, 5):
             raise ValueError("Requested position must be an integer between 1 and 4")
 
-        w = self._client.write_registers(self._compos_addr, position)
+        w = self._client.write_registers(self._compos_addr, position, slave=1)
         if w.isError():
             raise RuntimeError("Could not set position on controller")
 
@@ -337,7 +340,7 @@ class Selector(object):
         )
         builder.add_32bit_float(tolerance)
         registers = builder.to_registers()
-        w = self._client.write_registers(self._angle_tolerance_addr, registers)
+        w = self._client.write_registers(self._angle_tolerance_addr, registers, slave=1)
         if w.isError():
             raise RuntimeError("Could not set angle tolerance on controller")
         else:
@@ -363,6 +366,7 @@ class Selector(object):
         self.get_command_position()
         self.get_position()
         self.get_speed()
+        self.get_status()
         self.get_angle()
         self.get_angle_error()
         self.get_angle_tolerance()

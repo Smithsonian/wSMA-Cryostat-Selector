@@ -4,9 +4,9 @@
         "smax_table":"cryostat",
         "smax_key":"selector",
         "smax_control_keys":{
-            "position_control_key":"position_control",
-            "speed_control_key":"speed_control",
-            "angle_tolerance_control_key":"angle_tolerance_control"
+            "position_control_key":"position_control_callback",
+            "speed_control_key":"speed_control_callback",
+            "angle_tolerance_control_key":"angle_tolerance_control_callback"
         },
         "smax_init_keys":{
             "position_control_key":"position",
@@ -15,10 +15,10 @@
         }
     },
     "config":{
-            "ip_address":"selector-wsma2",
+            "selector":{"ip_address":"selector-wsma2",
             "position":2,
             "speed":2,
-            "angle_tolerance":0.5
+            "angle_tolerance":0.5}
     },
     "logged_data":{
         "command_position":{"type":"int"},

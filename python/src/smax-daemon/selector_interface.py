@@ -98,8 +98,7 @@ class SelectorInterface:
         try:
             with self._hardware_lock:
                 self._hardware = Selector( \
-                    ip_address = self._selector_ip, \
-                    port = self._selector_port)
+                    ip_address = self._selector_ip)
                 self._hardware_error = "None"
                 self.logger.debug(f"Connected")
                 if self._hardware and self._hardware_config:
@@ -113,18 +112,18 @@ class SelectorInterface:
             self.logger.error(f"Failed to connect to selector at {self._selector_ip} with error {e}.")
             
     def initialize_hardware(self, kwargs):
-        """Set the initial inverter frequency on daemon startup.  If a frequency
-        is not supplied, read it from the hardware config."""
-        if not "frequency" in kwargs:
-            self.logger.debug(f"'frequency' not in kwargs to initialize_hardware, reading from config file.")
-            kwargs["frequency"] = self._inverter_config.get("frequency", None)
+        """Set the initial values on daemon startup.  If values are
+        not supplied, read it from the hardware config."""
+        if not "position" in kwargs:
+            self.logger.debug(f"'position' not in kwargs to initialize_hardware, reading from config file.")
+            kwargs["position"] = self._hardware_config.get("position", None)
         
-        if kwargs["frequency"]:
-            freq = kwargs["frequency"]
-            self.logger.status(f"Setting inverter frequency to {freq} Hz.")
-            self._hardware.set_inverter_freq(freq)
+        if kwargs["position"]:
+            pos = kwargs["position"]
+            self.logger.status(f"Setting selector position to {pos}.")
+            self._hardware.set_position(pos)
         else:
-            self.logger.info(f"No default inverter frequency given.")
+            self.logger.info(f"No default selector position given.")
             
     def disconnect_hardware(self):
         self._hardware = None
