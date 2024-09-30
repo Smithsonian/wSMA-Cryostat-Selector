@@ -1,9 +1,8 @@
-__version__ = '0.2.0'
+__version__ = '1.0.0'
 
 from time import sleep
-from pymodbus.client import ModbusTcpClient
-from pymodbus.payload import BinaryPayloadDecoder, BinaryPayloadBuilder
-from pymodbus.constants import Endian
+
+import gclib
 
 default_IP = "192.168.42.100"
 
@@ -13,51 +12,49 @@ class Selector(object):
     The SelectorWheel object wraps a pymodbus.ModbusTcpClient instance which
     communicates with the Selector Wheel Controller over TCP/IP.
     """
-    #: int: address of the controller's commanded register, i.e. the _position of the wheel.
-    _compos_addr = 1000
+    #: str: Galil firmware variable holding the commanded position
+    _compos_var = 'A[0]'
     
-    #: int: address of the controller's current position register, i.e. the _position of the wheel
-    _curpos_addr = 1001
+    #: str: Galil firmware variable holding the current position, i.e. the _position of the wheel
+    _curpos_var = 'A[1]'
     
     #: int: address of the controller's speed register.
-    _speed_addr = 1002
+    _speed_var = 'A[2]'
 
     #: int: address of the controller's return code register.
-    _retcode_addr = 1003
+    _status_var = 'A[3]'
 
     #: int: address of the controller's time register.
-    _time_addr = 1004
+    _time_var = 'A[4]'
 
     #: int: address of the controller's angle error register (angular error in degrees)
-    _angle_addr = 2005
+    _angle_var = 'A[5]'
     
     #: int: address of the controller's angle error register (angular error in degrees)
-    _angle_error_addr = 2006
+    _angle_error_var = 'A[6]'
     
     #: int: address of the controller's angle error register (angular error in degrees)
-    _angle_tolerance_addr = 2007
+    _angle_tolerance_var = 'A[7]'
     
     #: int: address of the controller's position 1 setting
-    _pos_1_addr = 1008
+    _pos_1_var = 'POS[0]'
     
-    #: int: address of the controller's position 1 setting
-    _pos_2_addr = 1009
+    #: int: address of the controller's position 2 setting
+    _pos_2_var = 'POS[1]'
     
-    #: int: address of the controller's position 1 setting
-    _pos_3_addr = 1010
+    #: int: address of the controller's position 3 setting
+    _pos_3_var = 'POS[2]'
     
-    #: int: address of the controller's position 1 setting
-    _pos_4_addr = 1011
+    #: int: address of the controller's position 4 setting
+    _pos_4_var = 'POS[3]'
     
     #: int: address of the controller's resolver turns register
-    _resolver_turns_addr = 2012
+    _resolver_turns_var = 'R[0]'
     
     #: int: address of the controller's resolver position register
-    _resolver_position_addr = 2013
-    
-    _time_step = 0.25
+    _resolver_position_var = 'R[1]'
 
-    def __init__(self, ip_address=default_IP):
+    def __init__(self, ip_address=default_IP, debug=False):
         """Create a SelectorWheel object for communication with one Selector Wheel Controller.
         Opens a Modbus TCP connection to the Selector Wheel controller at `ip_address`, and reads the
         current _position, speed etc.
@@ -65,9 +62,22 @@ class Selector(object):
             ip_address (str): IP Address of the controller to communicate with
         """
         #: (:obj:`ModbusTcpClient`): Client for communicating with the controller
-        self._client = ModbusTcpClient(ip_address)
-
-        self.update_all()
+        self._debug = debug
+        
+        self._time_step = 0.1
+        
+        self._client = gclib.py()
+        
+        self.connect(ip_address)
+        
+    def connect(self, ip_address=default_IP):
+        
+        try:
+            self._client.GOpen(f"{ip_address} -s ALL")
+        
+            self.update_all()
+        except gclib.GclibError as e:
+            print(f"GCLib error: {str(e)}")
         
     def disconnect(self):
         """Disconnect from the modbus server"""
@@ -147,129 +157,127 @@ class Selector(object):
     def status(self):
         """int: Selector Wheel status"""
         return self._status
+    
+    def read_value(self, var_name):
+        """Read a variable value from the Galil controller"""
+        cmd = f'MG {var_name}'
+        if self._debug:
+            print(f"Calling '{cmd}'")
+        try:
+            ret = self._client.GCommand(cmd)
+        except gclib.GclibError as e:
+            raise RuntimeWarning('GCLib: Unknown variable')
+        
+        return float(ret)
+    
+    def write_value(self, var_name, value):
+        """Read a variable value from the Galil controller"""
+        cmd = f'{var_name}={value}'
+        if self._debug:
+            print(f"Calling '{cmd}'")
+        try:
+            ret = self._client.GCommand(cmd)
+        except gclib.GclibError as e:
+            raise RuntimeWarning(f'GCLib: Error writing value {e}')
 
     def get_command_position(self):
         """Read the commanded position from the controller."""
-        r = self._client.read_input_registers(self._compos_addr)
-        if r.isError():
-            raise RuntimeError("Could not get current position")
-        else:
-            self._command_position = int(r.registers[0])
+        ret = self.read_value(self._compos_var)
+        self._command_position = int(ret)
+        
+        return self.command_position
 
     def get_position(self):
         """Read the current position from the controller."""
-        r = self._client.read_input_registers(self._curpos_addr)
-        if r.isError():
-            raise RuntimeError("Could not get current position")
-        else:
-            self._position = int(r.registers[0])
+        ret = self.read_value(self._curpos_var)
+        self._position = int(ret)
+        
+        return self.position
 
     def get_pos_1(self):
         """Read pos_1 from the controller."""
-        r = self._client.read_input_registers(self._pos_1_addr)
-        if r.isError():
-            raise RuntimeError("Could not get position 1")
-        else:
-            self._pos_1 = int(r.registers[0])
+        ret = self.read_value(self._pos_1_var)
+        self._pos_1 = int(ret)
+
+        return self.pos_1
 
     def get_pos_2(self):
         """Read pos_2 from the controller."""
-        r = self._client.read_input_registers(self._pos_2_addr)
-        if r.isError():
-            raise RuntimeError("Could not get position 2")
-        else:
-            self._pos_2 = int(r.registers[0])
+        ret = self.read_value(self._pos_2_var)
+        self._pos_2 = int(ret)
 
+        return self.pos_2
+    
     def get_pos_3(self):
-        """Read pos_3 from the controller."""
-        r = self._client.read_input_registers(self._pos_3_addr)
-        if r.isError():
-            raise RuntimeError("Could not get position 3")
-        else:
-            self._pos_3 = int(r.registers[0])
+        """Read pos_1 from the controller."""
+        ret = self.read_value(self._pos_3_var)
+        self._pos_3 = int(ret)
+
+        return self.pos_3
 
     def get_pos_4(self):
         """Read pos_4 from the controller."""
-        r = self._client.read_input_registers(self._pos_4_addr)
-        if r.isError():
-            raise RuntimeError("Could not get position 4")
-        else:
-            self._pos_4 = int(r.registers[0])
+        ret = self.read_value(self._pos_4_var)
+        self._pos_4 = int(ret)
+
+        return self.pos_4
 
     def get_status(self):
-        """Read the current status from the controller."""
-        r = self._client.read_input_registers(self._retcode_addr)
-        if r.isError():
-            raise RuntimeError("Could not get current status")
-        else:
-            self._status = int(r.registers[0])
+        """Read pos_1 from the controller."""
+        ret = self.read_value(self._status_var)
+        self._status = int(ret)
 
+        return self.status
+    
     def get_speed(self):
-        """Read the current speed setting from the controller."""
-        r = self._client.read_input_registers(self._speed_addr)
-        if r.isError():
-            raise RuntimeError("Could not get current speed setting")
-        else:
-            self._speed = int(r.registers[0])
-        
+        """Read speed from the controller."""
+        ret = self.read_value(self._speed_var)
+        self._speed = int(ret)
+
+        return self.speed
+
     def get_angle(self):
-        """Read the current angle of the wheel from the controller."""
-        r = self._client.read_input_registers(self._angle_addr)
-        if r.isError():
-            raise RuntimeError("Could not get current angle")
-        else:
-            decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.BIG, wordorder=Endian.BIG)
-            result = decoder.decode_32bit_float()
-            self._angle = result
+        """Read wheel angle from the controller."""
+        ret = self.read_value(self._angle_var)
+        self._angle = ret
+
+        return self.angle
 
     def get_angle_error(self):
-        """Read the current angle error of the wheel from the controller."""
-        r = self._client.read_input_registers(self._angle_error_addr)
-        if r.isError():
-            raise RuntimeError("Could not get current angle error")
-        else:
-            decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.BIG, wordorder=Endian.BIG)
-            result = decoder.decode_32bit_float()
-            self._angle_error = result
-        
+        """Read wheel angle error from the controller."""
+        ret = self.read_value(self._angle_error_var)
+        self._angle_error = ret
+
+        return self.angle_error
+
     def get_angle_tolerance(self):
-        """Read the current angle tolerance of the wheel from the controller."""
-        r = self._client.read_input_registers(self._angle_tolerance_addr)
-        if r.isError():
-            raise RuntimeError("Could not get current angle tolerance")
-        else:
-            decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.BIG, wordorder=Endian.BIG)
-            result = decoder.decode_32bit_float()
-            self._angle_tolerance = result
-        
+        """Read the angle tolerance from the controller."""
+        ret = self.read_value(self._angle_tolerance_var)
+        self._angle_tolerance = ret
+
+        return self.angle_tolerance
+    
     def get_time(self):
-        """Read the time take for the last movement from the controller."""
-        r = self._client.read_input_registers(self._time_addr)
-        if r.isError():
-            raise RuntimeError("Could not get last movement time")
-        else:
-            self._time = int(r.registers[0])
+        """Read the time taken for the last movement from the controller."""
+        ret = self.read_value(self._time_var)
+        self._time = ret
+
+        return self.time
 
     def get_resolver_turns(self):
-        """Read the current turn count of the resolver."""
-        r = self._client.read_input_registers(self._resolver_turns_addr)
-        if r.isError():
-            raise RuntimeError("Could not get current _position error")
-        else:
-            decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.BIG, wordorder=Endian.BIG)
-            result = decoder.decode_32bit_float()
-            self._resolver_turns = result
-            
+        """Read the resolver turn count from the controller."""
+        ret = self.read_value(self._resolver_turns_var)
+        self._resolver_turns = int(ret)
+
+        return self.resolver_turns
+
     def get_resolver_position(self):
-        """Read the current position of the resolver."""
-        r = self._client.read_input_registers(self._resolver_position_addr)
-        if r.isError():
-            raise RuntimeError("Could not get current _position error")
-        else:
-            decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.BIG, wordorder=Endian.BIG)
-            result = decoder.decode_32bit_float()
-            self._resolver_position = result
-            
+        """Read pos_1 from the controller."""
+        ret = self.read_value(self._resolver_position_var)
+        self._resolver_position = int(ret)
+
+        return self.resolver_position
+           
     def update(self, debug=False):
         """Update all the data from the selector."""
         self.get_command_position()
@@ -281,12 +289,23 @@ class Selector(object):
         self.get_angle_error()
         self.get_angle_tolerance()
         if debug:
-            self.get_pos_1()
-            self.get_pos_2()
-            self.get_pos_3()
-            self.get_pos_4()
-            self.get_resolver_position()
-            self.get_resolver_turns()
+            self.update_extra()
+            
+    def update_extra(self):
+        """Get the extra status variables from the controller.
+        
+        These will only change when the wheel is rehomed."""
+        self.get_pos_1()
+        self.get_pos_2()
+        self.get_pos_3()
+        self.get_pos_4()
+        self.get_resolver_turns()
+        self.get_resolver_position()
+
+    def update_all(self):
+        """Get all the status variables from the controller"""
+        self.update()
+        self.update_extra()
 
     def set_speed(self, speed):
         """Set the speed of motion for the wheel.
@@ -296,11 +315,8 @@ class Selector(object):
         if speed not in range(1,4):
             raise ValueError("Speed must be an integer between 1 and 3")
 
-        w = self._client.write_registers(self._speed_addr, speed)
-        if w.isError():
-            raise RuntimeError("Could not set speed on controller")
-        else:
-            self._speed = self.get_speed()
+        self.write_value(self._speed_var, int(speed))
+        self._speed = self.get_speed()
 
     def set_position(self, position):
         """Set the _position for the wheel.
@@ -311,17 +327,11 @@ class Selector(object):
         if position not in range(1, 5):
             raise ValueError("Requested position must be an integer between 1 and 4")
 
-        w = self._client.write_registers(self._compos_addr, position)
-        if w.isError():
-            raise RuntimeError("Could not set position on controller")
+        self.write_value(self._compos_var, int(position))
+        sleep(self._time_step)
+        self._client.GMotionComplete('A')
 
-        # Sleep to allow motion to start
-        sleep(self._time_step/2)
-        # Wait for motion to complete.
-        while self.get_status():
-            sleep(self._time_step/4)
-            
-        self.update_all()
+        self.update()
         
     def set_angle_tolerance(self, tolerance):
         """Set the angle tolerance for corrections.
@@ -331,121 +341,15 @@ class Selector(object):
         if tolerance < 0.0:
             tolerance = abs(tolerance)
 
-        builder = BinaryPayloadBuilder(
-            wordorder=Endian.BIG,
-            byteorder=Endian.BIG
-        )
-        builder.add_32bit_float(tolerance)
-        registers = builder.to_registers()
-        w = self._client.write_registers(self._angle_tolerance_addr, registers)
-        if w.isError():
-            raise RuntimeError("Could not set angle tolerance on controller")
-        else:
-            self._angle_tolerance = self.get_angle_tolerance()
+        self.write_value(self._angle_tolerance_var, f"{tolerance:.3f}")
+        self._angle_tolerance = self.get_angle_tolerance()
 
     def home(self):
         """Move the wheel to the home position, and then to position 1.
         Selector wheel controller automatically homes on power on."""
-        w = self._client.write_registers(self._compos_addr, 5)
-        if w.isError():
-            raise RuntimeError("Could not request homing procedure")
-
-        # Sleep to allow motion to start
-        sleep(self._time_step/4)
-        # Wait for motion to complete.
-        while self.get_status():
-            sleep(self._time_step/4)
+        self.write_value(self._compos_var, 5)
+        sleep(self._time_step)
+        self._client.GMotionComplete('A')
+        sleep(self._time_step)
 
         self.update_all()
-        
-    def update_all(self):
-        """Get all status variables from controller."""
-        self.get_command_position()
-        self.get_position()
-        self.get_speed()
-        self.get_angle()
-        self.get_angle_error()
-        self.get_angle_tolerance()
-        self.get_time()
-        self.get_pos_1()
-        self.get_pos_2()
-        self.get_pos_3()
-        self.get_pos_4()
-        self.get_resolver_turns()
-        self.get_resolver_position()
-
-
-class DummySelector(Selector):
-    """A dummy selector wheel that just stores information without attempting
-    any communication, for testing purposes"""
-    def __init__(self, ip_address="0.0.0.0"):
-        """Create a DummySelector object for testing purposes.
-        Args:
-            ip_address (str): IP Address of the controller to communicate with
-        """
-        self._position = 1
-        self._speed = 1
-        self._angle_error = 42
-        self._time = 35
-
-    def get_position(self):
-        """Read the current setpoint position from self._position
-        Returns:
-            int: current setpoint position."""
-        return self._position
-
-    def get_speed(self):
-        """Read the current speed setting from self._speed
-        Returns:
-            int: current speed setting."""
-        pass
-
-    def get_status(self):
-        """Read the current status from the controller. Dummy version is always 0.
-        Returns:
-            int: current status. Either 1 for motion in progress or 0 for motion complete."""
-        self._status = 0
-
-    def get_angle_error(self):
-        """Read the current position error from self._angle_error.
-        Returns:
-            int: current position error in degrees x 100."""
-        return self._angle_error
-
-    def get_time(self):
-        """Read the time take for the last movement from self._time.
-        Returns:
-            int: time taken for the last move in milliseconds."""
-        return self._time
-
-    def set_position(self, position):
-        """Set the _position for the wheel.
-        Dummy version changes the position and increments _angle_error by the speed
-        Args:
-            position (int): Position setting. One of 1, 2, 3, or 4.
-        """
-        if position in range(1,5):
-            self._position = position
-            self._angle_error = self._angle_error + self._speed
-        else:
-            raise ValueError("Illegal position {} passed to Selector.set_position()".format(position))
-
-    def set_speed(self, speed):
-        """Set the speed of motion for the wheel.
-        Args:
-            speed (int): Speed setting. One of 1 (slowest), 2 or 3 (fastest). 1 and 2 are more reliable.
-        """
-        if speed in range(1,4):
-            self._speed = speed
-        else:
-            raise ValueError("Illegal speed {} passed to Selector.set_speed()".format(speed))
-
-    def home(self):
-        """Move the wheel to the home position, and then to position 1.
-        Also sets speed to 1.
-        Dummy version sets position to 1, speed to 1 and resets angle_error
-        Selector wheel controller automatically homes on power on."""
-        self._position = 1
-        self._speed = 1
-        self._angle_error = 42
-

@@ -1,8 +1,8 @@
-# lakeshore-smax-daemon
+# selector-smax-daemon
 
-A systemd service implemented in Python that reads values from the wSMA cryostat compressor control and readout, and writes the data to SMAx.
+A systemd service implemented in Python that reads values from the wSMA cryostat selector wheel control and readout, and writes the data to SMAx.
 
-Configuration of the daemon is set in the JSON format config file `compressor_config.json`.
+Configuration of the daemon is set in the JSON format config file `selector_config.json`.
 
 Service structure is based on tutorials at https://alexandra-zaharia.github.io/posts/stopping-python-systemd-service-cleanly/ and https://github.com/torfsen/python-systemd-tutorial
 
@@ -13,5 +13,5 @@ Installation as both a user and system service is described in the second tutori
 Requires:
 systemd-python (in turn requires linux pacakage systemd-devel)
 psutils
-wSMA-Cryostat-Compressor wsma_cryostat_compressor module
+wSMA-Cryostat-Compressor wsma_cryostat_selector module
 smax-python

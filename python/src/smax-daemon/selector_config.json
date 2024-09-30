@@ -3,39 +3,45 @@
     "smax_config":{
         "smax_table":"cryostat",
         "smax_key":"selector",
-        "smax_position_control_key":"position_control",
-        "smax_speed_control_key":"speed_control"
-    },
-    "selector":{
-        "ip_address":"selector-p1.proto1.lan",
-        "port":502,
-        "debug":true,
-        "default_position":1,
-        "default_speed":2,
-        "logged_data":{
-            "command_position":{"type":"int"},
-            "position":{"type":"int" },
-            "status":{"type":"int" },
-            "speed":{"type":"int"},
-            "angle":{
-                "type":"float",
-                "units":"deg"
-            },
-            "angle_error":{
-                "type":"float",
-                "units":"deg"
-            },
-            "angle_tolerance":{
-                "type":"float",
-                "units":"deg"},
-            "time":{
-                "type":"int",
-                "units":"ms"
-             }
+        "smax_control_keys":{
+            "position_control_key":"position_control_callback",
+            "speed_control_key":"speed_control_callback",
+            "angle_tolerance_control_key":"angle_tolerance_control_callback"
         },
-        "debug_data":{
-            "resolver_turns":{},
-            "resolver_position":{}
+        "smax_init_keys":{
+            "position_control_key":"position",
+            "speed_control_key":"speed",
+            "angle_tolerance_control_key":"angle_tolerance"
         }
+    },
+    "config":{
+            "selector":{"ip_address":"selector-wsma2",
+            "position":2,
+            "speed":2,
+            "angle_tolerance":0.5}
+    },
+    "logged_data":{
+        "command_position":{"type":"int"},
+        "position":{"type":"int" },
+        "status":{"type":"int" },
+        "speed":{"type":"int"},
+        "angle":{
+            "type":"float",
+            "units":"deg"},
+        "angle_error":{
+            "type":"float",
+            "units":"deg"},
+        "angle_tolerance":{
+            "type":"float",
+            "units":"deg"},
+        "time":{
+            "type":"int",
+            "units":"ms"},
+        "resolver_turns":{"type":"int"},
+        "resolver_position":{"type":"int"},
+        "pos_1":{"type":"int"},
+        "pos_2":{"type":"int"},
+        "pos_3":{"type":"int"},
+        "pos_4":{"type":"int"}
     }
 }
