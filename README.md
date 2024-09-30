@@ -1,6 +1,6 @@
 # wSMA-Cryostat-Selector
 
-Version: 1.0.0
+Version: 1.0.1
 
 This repository contains the motion controller code for the Galil DMC30000 motion controller in the wSMA Cryostat selector wheel controller box. and Python code for interfacing to the motion controller over TCP using Galil's gclib.
 

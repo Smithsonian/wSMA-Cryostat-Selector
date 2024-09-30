@@ -241,7 +241,7 @@ class SelectorInterface:
         if self._hardware:
             try:
                 with self._hardware_lock:
-                    self._hardware.set_angle_tolerance(int(message.data))
+                    self._hardware.set_angle_tolerance(float(message.data))
                     if self.logger:
                         self.logger.info(f"Setting selector wheel speed to {int(message.data)}")
             except Exception as e: # Except hardware errors
