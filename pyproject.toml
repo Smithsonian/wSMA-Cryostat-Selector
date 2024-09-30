@@ -17,7 +17,7 @@ readme = 'README.md'
 requires-python = '>=3.7'
 license = {text = 'MIT License'}
 dependencies = [
-    'pymodbus',
+    'gclib',
     'systemd-python',
     'retrying',
     'argparse',
