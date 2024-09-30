@@ -17,7 +17,7 @@ message = "Bump version: {current_version} → {new_version}"
 commit_args = "--no-verify"
 
 [[tool.bumpversion.files]]
-filename = "src/wsma_cryostat_selector/__init__.py"
+filename = "python/src/wsma_cryostat_selector/__init__.py"
 search = "__version__ = '{current_version}'"
 replace = "__version__ = '{new_version}'"
 
