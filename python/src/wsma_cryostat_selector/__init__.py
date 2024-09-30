@@ -206,6 +206,7 @@ class Selector(object):
             raise RuntimeError("Could not get current status")
         else:
             self._status = int(r.registers[0])
+        return self._status
 
     def get_speed(self):
         """Read the current speed setting from the controller."""
@@ -319,10 +320,13 @@ class Selector(object):
             raise RuntimeError("Could not set position on controller")
 
         # Sleep to allow motion to start
-        sleep(self._time_step/2)
+        sleep(self._time_step*2)
         # Wait for motion to complete.
-        while self.get_status():
-            sleep(self._time_step/4)
+        while True:
+            if not self.get_status():
+                break
+            print(".")
+            sleep(self._time_step)
             
         self.update_all()
         

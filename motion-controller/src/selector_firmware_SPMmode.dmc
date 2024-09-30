@@ -3,11 +3,14 @@ WT1000
 #SETUP
 SIA=1,29,14,-1<10>1
 YAA=256
-YBA=200
+YBA=1000
 YCA=16384
+drstep=_YAA*_YBA/_YCA
 YSA=1
 OEA=1
-MT-2.5
+ERA=_YAA*5
+CN -1,-1
+MT-2
 LCA=-15
 DMA[8]
 DMPOS[4]
@@ -38,12 +41,13 @@ calc_mov=0
 setpoint=0
 home=0
 ccounter=0
-maxmoves=5
+maxmoves=3
 homefail=0
 rres=16384
 roffset=rres*8192
+doffset=_TPA*drstep
+DPA=doffset
 rstep=45.1111
-drstep=15.625
 fastsp=75000
 fastAC= 150000
 fastDC= 150000
@@ -82,19 +86,20 @@ ccounter=ccounter+1
 A[3]=1
 bgtime=TIME
 raw_pos=_TPA - roffset
-raw_mov = raw_pos-setpoint
-calc_mov=@INT[((raw_pos-setpoint)*drstep)]
-IF(@ABS[raw_mov]>1024)
+raw_mov = setpoint-raw_pos
+calc_mov=@INT[((setpoint-raw_pos)*drstep)]
+MG "moving wheel", ccounter
+IF(@ABS[raw_mov]>128)
 speed=A[2]
+ELSE
+speed=1
+ENDIF
 IF(speed<=1);SPslowsp;ACslowAC;DCslowDC;ENDIF
 IF(speed=2);SPmedsp;ACmedAC;DCmedDC;ENDIF
 IF(speed>=3);SPfastsp;ACfastAC;DCfastDC;ENDIF
-ELSE
-SPslowsp;ACslowAC;DCslowDC
-ENDIF
 PRcalc_mov
 BGA
-MCA
+AMA
 raw_pos=_TPA - roffset
 ang_err = ((raw_pos-setpoint)/rstep)
 IF(@ABS[ang_err]>A[7])
@@ -110,13 +115,16 @@ A[6]=ang_err
 ccounter=0
 JP#EVENTLP
 #HOME
-IF(MOA);SHA;ENDIF
+MG "Homing wheel"
+ccounter=0
+IF(_MOA);SHA;ENDIF
+YSA=0
 homefail=1
 prev_pos=A[1]
 IF(prev_pos==0);prev_pos=1;ENDIF
 A[3]=1
 SPslowsp;ACslowAC;DCvfastDC
-IF(_TSA & 2);PR-10000;BGA;MCA;ENDIF
+IF((_TSA & 2) <> 2);PR10000;BGA;MCA;ENDIF
 HMA
 bgtime=TIME
 BGA
@@ -124,7 +132,11 @@ MCA
 OB1,1
 WT10
 OB1,0
-WT100
+WT500
+doffset=_TPA*drstep
+DPA=doffset
+homefail=0
+YSA=1
 endtime=TIME
 deltaT=endtime-bgtime
 A[4]=deltaT
@@ -136,7 +148,21 @@ POS[2]=POS[1]+4096
 POS[3]=POS[2]+4096
 A[0]=prev_pos
 JP#EVENTLP
+
 #POSERR
-MG "Position error fault, rehoming"
-WT 1000
+MG "POSERR Triggered"
+MG _QSA
+MG _ERA
+IF(_QSA<_YAA*3)
+MG "False Error"
+RE0
+ENDIF
+IF(_QSA>_ERA)
+MG "Rehoming"
 JP#HOME
+ELSE
+MG "Correcting Error"
+YRA=_QSA
+MCA
+ENDIF
+RE 0

@@ -2,13 +2,11 @@
 WT1000
 #SETUP
 SIA=1,29,14,-1<10>1
-YAA=256
-YBA=200
 YCA=16384
-YSA=1
-OEA=1
 MT-2.5
 LCA=-15
+AGA=1
+TWA=300
 DMA[8]
 DMPOS[4]
 DMR[2]
@@ -38,8 +36,9 @@ calc_mov=0
 setpoint=0
 home=0
 ccounter=0
-maxmoves=5
-homefail=0
+maxmoves=3
+stall=25
+timeout=8000
 rres=16384
 roffset=rres*8192
 rstep=45.1111
@@ -71,6 +70,7 @@ R[0] = @INT[raw_pos/rres]
 R[1] = @INT[raw_pos%rres]
 ang_err=((raw_pos-setpoint)/rstep)
 IF(@ABS[ang_err]>A[7])
+ccounter=0
 JP#MOVE
 ENDIF
 A[5]=(raw_pos-home)/rstep
@@ -94,7 +94,20 @@ SPslowsp;ACslowAC;DCslowDC
 ENDIF
 PRcalc_mov
 BGA
-MCA
+JP#MOVEWT
+#MOVEWT
+raw_pos=_TPA - roffset
+ang_err = ((raw_pos-setpoint)/rstep)
+IF(@ABS[ang_err]<A[7]);JP#ENDMOVE;
+ELSE;
+mvtime=TIME-bgtime
+IF(mvtime>timeout);JP#MCTIME
+ELSE;
+WT500
+mvmt=_TPA - roffset - raw_pos
+IF(@ABS[mvmt]<stall);JP#POSERR;ENDIF
+JP#MOVEWT
+#ENDMOVE
 raw_pos=_TPA - roffset
 ang_err = ((raw_pos-setpoint)/rstep)
 IF(@ABS[ang_err]>A[7])
@@ -107,11 +120,8 @@ A[1]=A[0]
 A[3]=0
 A[5]=(raw_pos-home)/rstep
 A[6]=ang_err
-ccounter=0
 JP#EVENTLP
 #HOME
-IF(MOA);SHA;ENDIF
-homefail=1
 prev_pos=A[1]
 IF(prev_pos==0);prev_pos=1;ENDIF
 A[3]=1
@@ -136,7 +146,7 @@ POS[2]=POS[1]+4096
 POS[3]=POS[2]+4096
 A[0]=prev_pos
 JP#EVENTLP
+#MCTIME
+JP#HOME
 #POSERR
-MG "Position error fault, rehoming"
-WT 1000
 JP#HOME
