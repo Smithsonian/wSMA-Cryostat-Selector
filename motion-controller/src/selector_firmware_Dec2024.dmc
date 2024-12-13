@@ -64,7 +64,7 @@ SHA
 #EVENTLP
 com_pos=A[0]
 cur_pos=A[1]
-off_pos=@INT[A[9]/360.*rres]
+off_pos=@INT[A[8]/360.*rres]
 IF(com_pos<=1);setpoint=POS[0];ENDIF
 IF(com_pos=2);setpoint=POS[1];ENDIF
 IF(com_pos=3);setpoint=POS[2];ENDIF
@@ -119,7 +119,7 @@ ccounter=0
 JP#EVENTLP
 #HOME
 MG "Homing wheel"
-A[9]=0.0
+A[8]=0.0
 off_pos=0
 ccounter=0
 IF(_MOA);SHA;ENDIF

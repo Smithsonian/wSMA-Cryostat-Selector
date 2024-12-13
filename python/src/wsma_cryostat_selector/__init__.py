@@ -18,40 +18,43 @@ class Selector(object):
     #: str: Galil firmware variable holding the current position, i.e. the _position of the wheel
     _curpos_var = 'A[1]'
     
-    #: int: address of the controller's speed register.
+    #: str: address of the controller's speed register.
     _speed_var = 'A[2]'
 
-    #: int: address of the controller's return code register.
+    #: str: address of the controller's return code register.
     _status_var = 'A[3]'
 
-    #: int: address of the controller's time register.
+    #: str: address of the controller's time register.
     _time_var = 'A[4]'
 
-    #: int: address of the controller's angle error register (angular error in degrees)
+    #: str: address of the controller's angle register (angle in degrees)
     _angle_var = 'A[5]'
     
-    #: int: address of the controller's angle error register (angular error in degrees)
+    #: str: address of the controller's angle error register (angular error in degrees)
     _angle_error_var = 'A[6]'
     
-    #: int: address of the controller's angle error register (angular error in degrees)
+    #: str: address of the controller's angle error tolerance register (maximum angular error in degrees)
     _angle_tolerance_var = 'A[7]'
     
-    #: int: address of the controller's position 1 setting
+    #: str: address of the controller's angle offset register (angle offset in degrees)
+    _angle_offset_var = 'A[8]'
+    
+    #: str: address of the controller's position 1 setting
     _pos_1_var = 'POS[0]'
     
-    #: int: address of the controller's position 2 setting
+    #: str: address of the controller's position 2 setting
     _pos_2_var = 'POS[1]'
     
-    #: int: address of the controller's position 3 setting
+    #: str: address of the controller's position 3 setting
     _pos_3_var = 'POS[2]'
     
-    #: int: address of the controller's position 4 setting
+    #: str: address of the controller's position 4 setting
     _pos_4_var = 'POS[3]'
     
-    #: int: address of the controller's resolver turns register
+    #: str: address of the controller's resolver turns register
     _resolver_turns_var = 'R[0]'
     
-    #: int: address of the controller's resolver position register
+    #: str: address of the controller's resolver position register
     _resolver_position_var = 'R[1]'
 
     def __init__(self, ip_address=default_IP, debug=False):
@@ -115,6 +118,11 @@ class Selector(object):
 
     @property
     def angle_tolerance(self):
+        """float: Angle tolerance of the Selector Wheel in degrees before a move is needed."""
+        return self._angle_tolerance
+    
+    @property
+    def angle_offset(self):
         """float: Angle tolerance of the Selector Wheel in degrees before a move is needed."""
         return self._angle_tolerance
 
@@ -257,6 +265,13 @@ class Selector(object):
 
         return self.angle_tolerance
     
+    def get_angle_tolerance(self):
+        """Read the angle offset from the controller."""
+        ret = self.read_value(self._angle_offset_var)
+        self._angle_offset = ret
+
+        return self.angle_offset
+    
     def get_time(self):
         """Read the time taken for the last movement from the controller."""
         ret = self.read_value(self._time_var)
@@ -288,6 +303,7 @@ class Selector(object):
         self.get_angle()
         self.get_angle_error()
         self.get_angle_tolerance()
+        self.get_angle_offset()
         if debug:
             self.update_extra()
             
@@ -343,6 +359,21 @@ class Selector(object):
 
         self.write_value(self._angle_tolerance_var, f"{tolerance:.3f}")
         self._angle_tolerance = self.get_angle_tolerance()
+
+    def set_angle_offset(self, offset):
+        """Set the angle offset from the nominal position that the wheel should go to.
+        This allows the wheel to be jogged from the nominal positions - helpful in alignment,
+        or for tweaking the angle of the polarizing grid.
+        
+        Small offsets in pointing may occur with offsets.
+        
+        Args:
+            offset (float): angle offset in degrees"""
+        self.write_value(self._angle_offset_var, f"{offset:.3f}")
+        self._angle_offset = self.get_angle_offset()
+        
+    def zero_angle_offset(self):
+        """Reset the angle offset to zero"""
 
     def home(self):
         """Move the wheel to the home position, and then to position 1.

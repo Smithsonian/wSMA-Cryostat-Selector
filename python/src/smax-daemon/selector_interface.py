@@ -247,10 +247,33 @@ class SelectorInterface:
             except Exception as e: # Except hardware errors
                 self._hardware_error = repr(e)
                 if self.logger:
-                    self.logger.error(f'Attempt by {message.origin} to set selector speed to {message.data} failed with {self._hardware_error}')
+                    self.logger.error(f'Attempt by {message.origin} to set selector angle tolerance to {message.data} failed with {self._hardware_error}')
                 
             if self.logger:
-                self.logger.status(f'{message.origin} set selector speed to {message.data}')
+                self.logger.status(f'{message.origin} set selector angle tolerance to {message.data}')
         else:
             if self.logger:
-                self.logger.status(f'Received {message.origin} to set selector speed to {message.data}, but no hardware connected.')
+                self.logger.status(f'Received {message.origin} to set selector angle tolerance to {message.data}, but no hardware connected.')
+    
+    def angle_offset_control_callback(self, message):
+        """Run on a pubsub notification to smax_table:selector:angle_offset_control_key"""
+        if self.logger:
+            date = message.timestamp
+            self.logger.info(f'Received callback notification for {message.smaxname} from {message.origin} with data {message.data} at {date}')
+        
+        if self._hardware:
+            try:
+                with self._hardware_lock:
+                    self._hardware.set_angle_offset(float(message.data))
+                    if self.logger:
+                        self.logger.info(f"Setting selector wheel offset to {int(message.data)}")
+            except Exception as e: # Except hardware errors
+                self._hardware_error = repr(e)
+                if self.logger:
+                    self.logger.error(f'Attempt by {message.origin} to set selector wheel offset to {message.data} failed with {self._hardware_error}')
+                
+            if self.logger:
+                self.logger.status(f'{message.origin} set selector wheel offset to {message.data}')
+        else:
+            if self.logger:
+                self.logger.status(f'Received {message.origin} to set selector wheel offset to {message.data}, but no hardware connected.')
