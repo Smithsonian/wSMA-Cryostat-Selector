@@ -98,7 +98,8 @@ class SelectorInterface:
         try:
             with self._hardware_lock:
                 self._hardware = Selector( \
-                    ip_address = self._selector_ip)
+                    ip_address = self._selector_ip, \
+                    port = self._selector_port)
                 self._hardware_error = "None"
                 self.logger.debug(f"Connected")
                 if self._hardware and self._hardware_config:

@@ -2,9 +2,12 @@ __version__ = '1.0.1'
 
 from time import sleep
 
-import gclib
+from pymodbus.client import ModbusTcpClient
+from pymodbus.payload import BinaryPayloadDecoder, BinaryPayloadBuilder
+from pymodbus.constants import Endian
 
 default_IP = "192.168.42.100"
+default_port = 502
 
 
 class Selector(object):
@@ -12,50 +15,50 @@ class Selector(object):
     The SelectorWheel object wraps a pymodbus.ModbusTcpClient instance which
     communicates with the Selector Wheel Controller over TCP/IP.
     """
-    #: str: Galil firmware variable holding the commanded position
-    _compos_var = 'A[0]'
+        #: int: address of the controller's commanded register, i.e. the _position of the wheel.
+    _compos_addr = 1000
     
-    #: str: Galil firmware variable holding the current position, i.e. the _position of the wheel
-    _curpos_var = 'A[1]'
+    #: int: address of the controller's current position register, i.e. the _position of the wheel
+    _curpos_addr = 1001
     
-    #: str: address of the controller's speed register.
-    _speed_var = 'A[2]'
+    #: int: address of the controller's speed register.
+    _speed_addr = 1002
 
-    #: str: address of the controller's return code register.
-    _status_var = 'A[3]'
+    #: int: address of the controller's return code register.
+    _retcode_addr = 1003
 
-    #: str: address of the controller's time register.
-    _time_var = 'A[4]'
+    #: int: address of the controller's time register.
+    _time_addr = 1004
 
-    #: str: address of the controller's angle register (angle in degrees)
-    _angle_var = 'A[5]'
+    #: int: address of the controller's angle error register (angular error in degrees)
+    _angle_addr = 2005
     
-    #: str: address of the controller's angle error register (angular error in degrees)
-    _angle_error_var = 'A[6]'
+    #: int: address of the controller's angle error register (angular error in degrees)
+    _angle_error_addr = 2006
     
-    #: str: address of the controller's angle error tolerance register (maximum angular error in degrees)
-    _angle_tolerance_var = 'A[7]'
+    #: int: address of the controller's angle error register (angular error in degrees)
+    _angle_tolerance_addr = 2007
     
-    #: str: address of the controller's angle offset register (angle offset in degrees)
-    _angle_offset_var = 'A[8]'
+    #: int: address of the controller's angle offset register (angular offset in degress)
+    _angle_offset_addr = 2008
     
-    #: str: address of the controller's position 1 setting
-    _pos_1_var = 'POS[0]'
+    #: int: address of the controller's position 1 setting
+    _pos_1_addr = 1009
     
-    #: str: address of the controller's position 2 setting
-    _pos_2_var = 'POS[1]'
+    #: int: address of the controller's position 2 setting
+    _pos_2_addr = 1010
     
-    #: str: address of the controller's position 3 setting
-    _pos_3_var = 'POS[2]'
+    #: int: address of the controller's position 3 setting
+    _pos_3_addr = 1011
     
-    #: str: address of the controller's position 4 setting
-    _pos_4_var = 'POS[3]'
+    #: int: address of the controller's position 4 setting
+    _pos_4_addr = 1012
     
-    #: str: address of the controller's resolver turns register
-    _resolver_turns_var = 'R[0]'
+    #: int: address of the controller's resolver turns register
+    _resolver_turns_addr = 2013
     
-    #: str: address of the controller's resolver position register
-    _resolver_position_var = 'R[1]'
+    #: int: address of the controller's resolver position register
+    _resolver_position_addr = 2014
 
     def __init__(self, ip_address=default_IP, debug=False):
         """Create a SelectorWheel object for communication with one Selector Wheel Controller.
@@ -69,18 +72,12 @@ class Selector(object):
         
         self._time_step = 0.1
         
-        self._client = gclib.py()
-        
         self.connect(ip_address)
         
-    def connect(self, ip_address=default_IP):
-        
-        try:
-            self._client.GOpen(f"{ip_address} -s ALL")
-        
-            self.update_all()
-        except gclib.GclibError as e:
-            print(f"GCLib error: {str(e)}")
+    def connect(self, ip_address=default_IP, port=default_port):
+        self._client = ModbusTcpClient(ip_address, port=port)
+
+        self.update_all()
         
     def disconnect(self):
         """Disconnect from the modbus server"""
@@ -166,27 +163,67 @@ class Selector(object):
         """int: Selector Wheel status"""
         return self._status
     
-    def read_value(self, var_name):
-        """Read a variable value from the Galil controller"""
-        cmd = f'MG {var_name}'
-        if self._debug:
-            print(f"Calling '{cmd}'")
-        try:
-            ret = self._client.GCommand(cmd)
-        except gclib.GclibError as e:
-            raise RuntimeWarning('GCLib: Unknown variable')
+    def read_value(self, register):
+        """Pick which read method to use based on the register number.
         
-        return float(ret)
+        The Galil controller uses 1xxx registers for ints and 2xxx registers for floats."""
+        if register >= 2000:
+            return self.read_float(register)
+        else:
+            return self.read_int(register)
+        
+    def write_value(self, register, value):
+        """Pick which write method to use based on the register number.
+        
+        The Galil controller uses 1xxx registers for ints and 2xxx registers for floats."""
+        if register >= 2000:
+            return self.write_float(register, value)
+        else:
+            return self. write_int(register, value)
     
-    def write_value(self, var_name, value):
+    def read_int(self, register):
+        """Read a variable value from the Galil controller"""
+        r = self._read_registers(register)
+        if r.isError():
+            raise RuntimeError(f"Could not read register {register}")
+        
+        return int(r.registers[0])
+    
+    def read_float(self, register):
+        """Read a variable value from the Galil controller"""
+        r = self._read_registers(register)
+        if r.isError():
+            raise RuntimeError(f"Could not read register {register}")
+        
+        decoder = BinaryPayloadDecoder.fromRegisters(r.registers, byteorder=Endian.BIG, wordorder=Endian.BIG)
+        result = decoder.decode_32bit_float()
+        return result
+    
+    def write_int(self, var_name, value):
         """Read a variable value from the Galil controller"""
         cmd = f'{var_name}={value}'
         if self._debug:
             print(f"Calling '{cmd}'")
-        try:
-            ret = self._client.GCommand(cmd)
-        except gclib.GclibError as e:
-            raise RuntimeWarning(f'GCLib: Error writing value {e}')
+        
+        w = self._client.write_registers(self._compos_addr, value, slave=1)
+        if w.isError():
+            raise RuntimeError("Could not set position on controller")
+    
+    def write_float(self, var_name, value):
+        """Read a variable value from the Galil controller"""
+        cmd = f'{var_name}={value}'
+        if self._debug:
+            print(f"Calling '{cmd}'")
+        
+        builder = BinaryPayloadBuilder(
+            wordorder=Endian.BIG,
+            byteorder=Endian.BIG
+        )
+        builder.add_32bit_float(tolerance)
+        registers = builder.to_registers()
+        w = self._client.write_registers(self._angle_tolerance_addr, registers, slave=1)
+        if w.isError():
+            raise RuntimeError("Could not set angle tolerance on controller")    
 
     def get_command_position(self):
         """Read the commanded position from the controller."""
@@ -344,8 +381,11 @@ class Selector(object):
             raise ValueError("Requested position must be an integer between 1 and 4")
 
         self.write_value(self._compos_var, int(position))
-        sleep(self._time_step)
-        self._client.GMotionComplete('A')
+        # Sleep to allow motion to start
+        sleep(self._time_step/4)
+        # Wait for motion to complete.
+        while self.get_status():
+            sleep(self._time_step/4)
 
         self.update()
         
@@ -379,8 +419,10 @@ class Selector(object):
         """Move the wheel to the home position, and then to position 1.
         Selector wheel controller automatically homes on power on."""
         self.write_value(self._compos_var, 5)
-        sleep(self._time_step)
-        self._client.GMotionComplete('A')
-        sleep(self._time_step)
+        # Sleep to allow motion to start
+        sleep(self._time_step/4)
+        # Wait for motion to complete.
+        while self.get_status():
+            sleep(self._time_step/4)
 
         self.update_all()
