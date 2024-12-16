@@ -121,7 +121,7 @@ class Selector(object):
     @property
     def angle_offset(self):
         """float: Angle tolerance of the Selector Wheel in degrees before a move is needed."""
-        return self._angle_tolerance
+        return self._angle_offset
 
     @property
     def time(self):
@@ -183,7 +183,7 @@ class Selector(object):
     
     def read_int(self, register):
         """Read a variable value from the Galil controller"""
-        r = self._read_registers(register)
+        r = self._client.read_input_registers(register)
         if r.isError():
             raise RuntimeError(f"Could not read register {register}")
         
@@ -191,7 +191,7 @@ class Selector(object):
     
     def read_float(self, register):
         """Read a variable value from the Galil controller"""
-        r = self._read_registers(register)
+        r = self._client.read_input_registers(register)
         if r.isError():
             raise RuntimeError(f"Could not read register {register}")
         
@@ -205,7 +205,7 @@ class Selector(object):
         if self._debug:
             print(f"Calling '{cmd}'")
         
-        w = self._client.write_registers(self._compos_addr, value, slave=1)
+        w = self._client.write_single_register(self._compos_addr, value, slave=1)
         if w.isError():
             raise RuntimeError("Could not set position on controller")
     
@@ -227,105 +227,105 @@ class Selector(object):
 
     def get_command_position(self):
         """Read the commanded position from the controller."""
-        ret = self.read_value(self._compos_var)
+        ret = self.read_value(self._compos_addr)
         self._command_position = int(ret)
         
         return self.command_position
 
     def get_position(self):
         """Read the current position from the controller."""
-        ret = self.read_value(self._curpos_var)
+        ret = self.read_value(self._curpos_addr)
         self._position = int(ret)
         
         return self.position
 
     def get_pos_1(self):
         """Read pos_1 from the controller."""
-        ret = self.read_value(self._pos_1_var)
+        ret = self.read_value(self._pos_1_addr)
         self._pos_1 = int(ret)
 
         return self.pos_1
 
     def get_pos_2(self):
         """Read pos_2 from the controller."""
-        ret = self.read_value(self._pos_2_var)
+        ret = self.read_value(self._pos_2_addr)
         self._pos_2 = int(ret)
 
         return self.pos_2
     
     def get_pos_3(self):
         """Read pos_1 from the controller."""
-        ret = self.read_value(self._pos_3_var)
+        ret = self.read_value(self._pos_3_addr)
         self._pos_3 = int(ret)
 
         return self.pos_3
 
     def get_pos_4(self):
         """Read pos_4 from the controller."""
-        ret = self.read_value(self._pos_4_var)
+        ret = self.read_value(self._pos_4_addr)
         self._pos_4 = int(ret)
 
         return self.pos_4
 
     def get_status(self):
         """Read pos_1 from the controller."""
-        ret = self.read_value(self._status_var)
+        ret = self.read_value(self._status_addr)
         self._status = int(ret)
 
         return self.status
     
     def get_speed(self):
         """Read speed from the controller."""
-        ret = self.read_value(self._speed_var)
+        ret = self.read_value(self._speed_addr)
         self._speed = int(ret)
 
         return self.speed
 
     def get_angle(self):
         """Read wheel angle from the controller."""
-        ret = self.read_value(self._angle_var)
+        ret = self.read_value(self._angle_addr)
         self._angle = ret
 
         return self.angle
 
     def get_angle_error(self):
         """Read wheel angle error from the controller."""
-        ret = self.read_value(self._angle_error_var)
+        ret = self.read_value(self._angle_error_addr)
         self._angle_error = ret
 
         return self.angle_error
 
     def get_angle_tolerance(self):
         """Read the angle tolerance from the controller."""
-        ret = self.read_value(self._angle_tolerance_var)
+        ret = self.read_value(self._angle_tolerance_addr)
         self._angle_tolerance = ret
 
         return self.angle_tolerance
     
-    def get_angle_tolerance(self):
+    def get_angle_offset(self):
         """Read the angle offset from the controller."""
-        ret = self.read_value(self._angle_offset_var)
+        ret = self.read_value(self._angle_offset_addr)
         self._angle_offset = ret
 
         return self.angle_offset
     
     def get_time(self):
         """Read the time taken for the last movement from the controller."""
-        ret = self.read_value(self._time_var)
+        ret = self.read_value(self._time_addr)
         self._time = ret
 
         return self.time
 
     def get_resolver_turns(self):
         """Read the resolver turn count from the controller."""
-        ret = self.read_value(self._resolver_turns_var)
+        ret = self.read_value(self._resolver_turns_addr)
         self._resolver_turns = int(ret)
 
         return self.resolver_turns
 
     def get_resolver_position(self):
         """Read pos_1 from the controller."""
-        ret = self.read_value(self._resolver_position_var)
+        ret = self.read_value(self._resolver_position_addr)
         self._resolver_position = int(ret)
 
         return self.resolver_position
@@ -380,7 +380,7 @@ class Selector(object):
         if position not in range(1, 5):
             raise ValueError("Requested position must be an integer between 1 and 4")
 
-        self.write_value(self._compos_var, int(position))
+        self.write_value(self._compos_addr, int(position))
         # Sleep to allow motion to start
         sleep(self._time_step/4)
         # Wait for motion to complete.
@@ -397,7 +397,7 @@ class Selector(object):
         if tolerance < 0.0:
             tolerance = abs(tolerance)
 
-        self.write_value(self._angle_tolerance_var, f"{tolerance:.3f}")
+        self.write_value(self._angle_tolerance_addr, f"{tolerance:.3f}")
         self._angle_tolerance = self.get_angle_tolerance()
 
     def set_angle_offset(self, offset):
@@ -409,7 +409,7 @@ class Selector(object):
         
         Args:
             offset (float): angle offset in degrees"""
-        self.write_value(self._angle_offset_var, f"{offset:.3f}")
+        self.write_value(self._angle_offset_addr, f"{offset:.3f}")
         self._angle_offset = self.get_angle_offset()
         
     def zero_angle_offset(self):
@@ -418,7 +418,7 @@ class Selector(object):
     def home(self):
         """Move the wheel to the home position, and then to position 1.
         Selector wheel controller automatically homes on power on."""
-        self.write_value(self._compos_var, 5)
+        self.write_value(self._compos_addr, 5)
         # Sleep to allow motion to start
         sleep(self._time_step/4)
         # Wait for motion to complete.
