@@ -124,7 +124,7 @@ class Selector(object):
     @property
     def angle_offset(self):
         """float: Angle tolerance of the Selector Wheel in degrees before a move is needed."""
-        return self._angle_tolerance
+        return self._angle_offset
 
     @property
     def time(self):
@@ -265,7 +265,7 @@ class Selector(object):
 
         return self.angle_tolerance
     
-    def get_angle_tolerance(self):
+    def get_angle_offset(self):
         """Read the angle offset from the controller."""
         ret = self.read_value(self._angle_offset_var)
         self._angle_offset = ret
@@ -374,6 +374,7 @@ class Selector(object):
         
     def zero_angle_offset(self):
         """Reset the angle offset to zero"""
+        self.set_angle_offset(0.0)
 
     def home(self):
         """Move the wheel to the home position, and then to position 1.
