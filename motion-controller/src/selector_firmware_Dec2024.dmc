@@ -65,6 +65,9 @@ SHA
 com_pos=A[0]
 cur_pos=A[1]
 off_pos=@INT[A[8]/360.*rres]
+raw_pos=_TPA - roffset
+R[0] = @INT[raw_pos/rres]
+R[1] = @INT[raw_pos%rres]
 IF(com_pos<=1);setpoint=POS[0];ENDIF
 IF(com_pos=2);setpoint=POS[1];ENDIF
 IF(com_pos=3);setpoint=POS[2];ENDIF
@@ -73,11 +76,8 @@ IF(com_pos>6);setpoint=POS[3];ENDIF
 IF(com_pos=5)
 JP#HOME
 ENDIF
-raw_pos=_TPA - roffset
-R[0] = @INT[raw_pos/rres]
-R[1] = @INT[raw_pos%rres]
 ang_err=((raw_pos-setpoint-off_pos)/rstep)
-IF(@ABS[ang_err]>A[7])
+IF((@ABS[ang_err]>A[7])&(@ABS[ang_err]<300.0))
 JP#MOVE
 ENDIF
 A[5]=(raw_pos-home)/rstep
@@ -105,7 +105,7 @@ BGA
 AMA
 raw_pos=_TPA - roffset
 ang_err = ((raw_pos-setpoint-off_pos)/rstep)
-IF(@ABS[ang_err]>A[7])
+IF((@ABS[ang_err]>A[7])&(@ABS[ang_err]<300.0))
 IF(ccounter>maxmoves);JP#HOME;ELSE;JP#MOVE;ENDIF
 ENDIF
 endtime=TIME
@@ -152,4 +152,5 @@ POS[1]=POS[0]+4096
 POS[2]=POS[1]+4096
 POS[3]=POS[2]+4096
 A[0]=prev_pos
+MG "Homing Complete"
 JP#EVENTLP
