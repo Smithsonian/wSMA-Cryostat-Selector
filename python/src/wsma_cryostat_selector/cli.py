@@ -43,6 +43,8 @@ parser.add_argument("-s", "--speed", type=int, choices=[1,2,3],
                          "Does not affect the speed of homing operations.")
 parser.add_argument("-t", "--tolerance", type=float,
                     help="Set the angular position tolerance for the wheel in degrees")
+parser.add_argument("-o", "--offset", type=float,
+                    help="Set the angular position offset for the wheel in degrees")
 parser.add_argument("position", type=int, choices=[1,2,3,4], nargs="?",
                     help="The wheel position to move to.")
 
@@ -74,6 +76,11 @@ def main(args=None):
         if args.verbosity:
             print(f"Setting speed to {args.speed}")
         sel.set_speed(args.speed)
+        
+    if args.offset:
+        if args.verbosity:
+            print(f"Setting offset to {args.offset}")
+        sel.set_angle_offset(args.offset)
 
     if args.position:
         print(f"Moving to position {args.position}")
@@ -82,13 +89,15 @@ def main(args=None):
             print("Done")
     else:
         print(f"Current selector position : {sel.position}")
+        if sel.angle_offset != 0.0:
+            print(f"Selector angle offset     : {sel.angle_offset:.3f} deg")
 
     if args.verbosity:
         print(f"Time for last move        : {sel.time} ms")
         print(f"Selector speed setting    : {sel.speed}")
         print(f"Selector angle            : {sel.angle:.3f} deg")
         print(f"Selector angle error      : {sel.angle_error:.3f} deg")
-        print(f"Selector angle tolerance  : {sel.angle_tolerance:.3f}")
+        print(f"Selector angle tolerance  : {sel.angle_tolerance:.3f} deg")
         
     if args.pos:
         print(f"Position 1 location : {sel.pos_1:d}")

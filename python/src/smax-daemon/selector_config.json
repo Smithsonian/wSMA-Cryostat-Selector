@@ -6,19 +6,22 @@
         "smax_control_keys":{
             "position_control_key":"position_control_callback",
             "speed_control_key":"speed_control_callback",
-            "angle_tolerance_control_key":"angle_tolerance_control_callback"
+            "angle_tolerance_control_key":"angle_tolerance_control_callback",
+            "angle_offset_control_key":"angle_offset_control_callback"
         },
         "smax_init_keys":{
             "position_control_key":"position",
             "speed_control_key":"speed",
-            "angle_tolerance_control_key":"angle_tolerance"
+            "angle_tolerance_control_key":"angle_tolerance",
+            "angle_offset_control_key":"angle_offset"
         }
     },
     "config":{
             "selector":{"ip_address":"selector-wsma2",
             "position":2,
             "speed":2,
-            "angle_tolerance":0.5}
+            "angle_tolerance":0.5,
+            "angle_offset":0.0}
     },
     "logged_data":{
         "command_position":{"type":"int"},
@@ -34,6 +37,9 @@
         "angle_tolerance":{
             "type":"float",
             "units":"deg"},
+        "angle_offset":{
+                "type":"float",
+                "units":"deg"},
         "time":{
             "type":"int",
             "units":"ms"},
