@@ -81,6 +81,8 @@ class Selector(object):
             self.update_all()
         except gclib.GclibError as e:
             print(f"GCLib error: {str(e)}")
+            if str(e) == 'device failed to open':
+                print(f"Could not connect to selector controller at {ip_address}")
         
     def disconnect(self):
         """Disconnect from the modbus server"""
