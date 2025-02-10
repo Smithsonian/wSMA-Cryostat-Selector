@@ -18,10 +18,7 @@ import os
 import argparse
 import wsma_cryostat_selector
 
-default_ip = '192.168.42.100'
-
-if "WSMASELECTOR" in os.environ:
-    default_ip = os.environ['WSMASELECTOR']
+default_ip = os.environ.get('WSMASELECTOR', '192.168.42.100')
 
 parser = argparse.ArgumentParser(description="Move the selector wheel to given position, "
                                              "or print current position.")
