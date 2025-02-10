@@ -4,16 +4,16 @@
         "smax_table":"cryostat",
         "smax_key":"selector",
         "smax_control_keys":{
-            "position_control_key":"position_control_callback",
-            "speed_control_key":"speed_control_callback",
-            "angle_tolerance_control_key":"angle_tolerance_control_callback",
-            "angle_offset_control_key":"angle_offset_control_callback"
+            "position_control":"position_control_callback",
+            "speed_control":"speed_control_callback",
+            "angle_tolerance_control":"angle_tolerance_control_callback",
+            "angle_offset_control":"angle_offset_control_callback"
         },
         "smax_init_keys":{
-            "position_control_key":"position",
-            "speed_control_key":"speed",
-            "angle_tolerance_control_key":"angle_tolerance",
-            "angle_offset_control_key":"angle_offset"
+            "position_control":"position",
+            "speed_control":"speed",
+            "angle_tolerance_control":"angle_tolerance",
+            "angle_offset_control":"angle_offset"
         }
     },
     "config":{
