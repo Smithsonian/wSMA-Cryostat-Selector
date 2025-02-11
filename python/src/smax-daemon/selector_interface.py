@@ -158,7 +158,7 @@ class SelectorInterface:
                         # If this is a compound key, push down to the leaf attribute
                         if len(attribute.split(".")) > 1:
                             for d in attribute.split(".")[1:]:
-                                reading = reading.__getattr__(d)
+                                reading = reading.__getattribute__(d)
                         # If this is a method, call it to get the value
                         if type(reading) is types.MethodType:
                             if "args" in self._hardware_data[data].keys():
