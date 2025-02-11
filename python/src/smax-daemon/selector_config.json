@@ -17,7 +17,7 @@
         }
     },
     "config":{
-            "selector":{"ip_address":"selector-wsma2",
+            "selector":{"ip_address":"selector-wsma1",
             "position":2,
             "speed":2,
             "angle_tolerance":0.5,
