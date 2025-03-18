@@ -200,19 +200,16 @@ class SelectorInterface:
                 with self._hardware_lock:
                     if message.data:
                         if message.data == 5 or message.data == 0:
-                            self.logger.info(f"Homing selector")
+                            self.logger.status(f"Homing selector")
                             self._hardware.home()
                         else:
                             self._hardware.set_position(int(message.data))
                             if self.logger:
-                                self.logger.info(f"Moving selector to {message.data}")
+                                self.logger.status(f"Moving selector to {message.data}")
             except Exception as e: # Except hardware errors
                 self._hardware_error = repr(e)
                 if self.logger:
                     self.logger.error(f'Attempt by {message.origin} to set position to {message.data} failed with {self._hardware_error}')
-                
-            if self.logger:
-                self.logger.status(f'{message.origin} set selector position to {message.data}')
         else:
             if self.logger:
                 self.logger.status(f'{message.origin} tried to set selector position to {message.data}, but no hardware connected.')
