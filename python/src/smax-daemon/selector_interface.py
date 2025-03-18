@@ -195,6 +195,7 @@ class SelectorInterface:
             try:
                 with self._hardware_lock:
                     if message.data:
+                        self.logger.warning(f"Got message data {message.data} of type {type(message.data)}")
                         if message.data == 5 or message.data == 0:
                             self.logger.info(f"Homing selector to {message.data}")
                             self._hardware.home()
