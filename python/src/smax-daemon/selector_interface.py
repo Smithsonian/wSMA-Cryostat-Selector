@@ -120,8 +120,12 @@ class SelectorInterface:
         
         if kwargs["position"]:
             pos = kwargs["position"]
-            self.logger.status(f"Setting selector position to {pos}.")
-            self._hardware.set_position(pos)
+            if pos == 5 or pos == 0:
+                self.logger.status(f"Homing selector.")
+                self._hardware.home()
+            else:
+                self.logger.status(f"Setting selector position to {pos}.")
+                self._hardware.set_position(pos)
         else:
             self.logger.info(f"No default selector position given.")
             
@@ -195,9 +199,8 @@ class SelectorInterface:
             try:
                 with self._hardware_lock:
                     if message.data:
-                        self.logger.warning(f"Got message data {message.data} of type {type(message.data)}")
                         if message.data == 5 or message.data == 0:
-                            self.logger.info(f"Homing selector to {message.data}")
+                            self.logger.info(f"Homing selector")
                             self._hardware.home()
                         else:
                             self._hardware.set_position(int(message.data))
