@@ -195,9 +195,13 @@ class SelectorInterface:
             try:
                 with self._hardware_lock:
                     if message.data:
-                        self._hardware.set_position(int(message.data))
-                        if self.logger:
-                            self.logger.info(f"Moving selector to {message.data}")
+                        if message.data == 5 or message.data == 0:
+                            self.logger.info(f"Homing selector to {message.data}")
+                            self._hardware.home()
+                        else:
+                            self._hardware.set_position(int(message.data))
+                            if self.logger:
+                                self.logger.info(f"Moving selector to {message.data}")
             except Exception as e: # Except hardware errors
                 self._hardware_error = repr(e)
                 if self.logger:
