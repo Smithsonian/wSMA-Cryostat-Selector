@@ -330,6 +330,11 @@ class Selector(object):
         Args:
             speed (int): Speed setting. One of 1 (slowest), 2 or 3 (fastest). 1 and 2 are more reliable.
         """
+        try:
+            speed = int(speed)
+        except ValueError:
+            raise ValueError("Cannot cast speed to integer")
+        
         if speed not in range(1,4):
             raise ValueError("Speed must be an integer between 1 and 3")
 
@@ -342,8 +347,13 @@ class Selector(object):
         Args:
             position (int): Position setting. One of 1, 2, 3, or 4.
         """
+        try:
+            position = int(position)
+        except ValueError:
+            raise ValueError("Cannot cast position to integer.")
+        
         if position not in range(1, 5):
-            raise ValueError("Requested position must be an integer between 1 and 4")
+            raise ValueError("Requested position must be an integer between 1 and 4.")
 
         self.write_value(self._compos_var, int(position))
         sleep(self._time_step)
