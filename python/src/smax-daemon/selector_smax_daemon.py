@@ -117,7 +117,7 @@ class SelectorSmaxService:
         self.delay = 1.0
 
     def _init_logger(self):
-        logger = logging.getLogger(__name__)
+        logger = logging.getLogger(daemon_name)
         logger.setLevel(logging_level)
         file_handler = logging.FileHandler(f'{daemon_name.lower()}.log')
         file_handler.setLevel(logging_level)
