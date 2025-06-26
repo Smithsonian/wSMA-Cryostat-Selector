@@ -173,15 +173,15 @@ class SelectorSmaxService:
     def start(self):
         """Code to be run before the service's main loop"""
         # Start up code
-
+        
+        # Create the hardware interface
+        self.hardware = HardwareInterface(config=self._config, logger=self.logger)
+        
         # Create the SMA-X interface
         #
         # There's no point to us starting without a SMA-X connection, so this call will
         # use retrying, and hang until we get a connection.
         self.connect_to_smax()
-        
-        # Create the hardware interface
-        self.hardware = HardwareInterface(config=self._config, logger=self.logger)
         
         try:
             self.connect_to_hardware()
