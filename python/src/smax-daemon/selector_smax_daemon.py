@@ -72,11 +72,14 @@ def add_logging_level(level_name, level_num, method_name=None):
     setattr(logging, level_name, level_num)
     setattr(logging.getLoggerClass(), method_name, logForLevel)
     setattr(logging, method_name, logToRoot)
-    
-add_logging_level('STATUS', logging.WARNING+5)
+
+try:
+    add_logging_level('STATUS', logging.WARNING+5)
+except AttributeError:
+    pass
 
 # Change between testing and production
-logging_level = logging.WARNING
+logging_level = logging.INFO
 
 logging.basicConfig(format='%(levelname)s - %(message)s', level=logging_level)
 
