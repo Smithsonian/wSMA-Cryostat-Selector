@@ -21,7 +21,7 @@ dependencies = [
     'systemd-python',
     'retrying',
     'argparse',
-    'smax @ https://github.com/Smithsonian/smax-python/archive/refs/tags/v1.2.1.zip'
+    'smax @ https://github.com/Smithsonian/smax-python/archive/refs/tags/v1.2.2.zip'
 ]
 dynamic = ["version"]
 
