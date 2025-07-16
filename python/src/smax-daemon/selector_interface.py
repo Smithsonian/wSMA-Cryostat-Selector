@@ -50,8 +50,6 @@ class SelectorInterface:
         
         if config:
             self.configure(config)
-            
-        self.connect_hardware()
         
     def __getattr__(self, name):
         """Override __getattr__ so that we can pass requests for attributes to the
@@ -122,10 +120,16 @@ class SelectorInterface:
             pos = kwargs["position"]
             if pos == 5 or pos == 0:
                 self.logger.status(f"Homing selector.")
-                self._hardware.home()
+                try:
+                    self._hardware.home()
+                except Exception as e:
+                    self.logger.error(f"Could not home selector: {e}")
             else:
                 self.logger.status(f"Setting selector position to {pos}.")
-                self._hardware.set_position(pos)
+                try:
+                    self._hardware.set_position(pos)
+                except Exception as e:
+                    self.logger.error(f"Could not home selector: {e}")
         else:
             self.logger.info(f"No default selector position given.")
             
@@ -180,105 +184,108 @@ class SelectorInterface:
                 logged_data['comm_error'] = "None"
             except Exception as e: # Except hardware connection errors
                 self._hardware = None
+                self.logger.error(f'Connection Error {e}')
                 logged_data = {'comm_status':'connection error'}
                 logged_data['comm_error'] = repr(e)
+                self.logging_action()
         else:
+            self.logger.error(f'Selector device not connected')
             logged_data = {'comm_status':"connection error",
                            'comm_error':"Not Connected"}
         
         return logged_data
         
-
     def position_control_callback(self, message):
         """Run on a pubsub notification to smax_table:selector:position_control_key"""
-        if self.logger:
-            date = message.timestamp
-            self.logger.info(f'Received callback notification for {message.smaxname} from {message.origin} with data {message.data} at {date}')
+        date = message.timestamp
+        self.logger.info(f'Received callback notification for {message.smaxname} from {message.origin} with data {message.data} at {date}')
+        
+        if self._hardware is None:
+            self.connect_hardware()
         
         if self._hardware:
             try:
                 with self._hardware_lock:
                     if message.data:
                         if message.data == 5 or message.data == 0:
-                            self.logger.status(f"Homing selector")
-                            self._hardware.home()
+                            self.logger.info(f"Homing selector")
+                            try:
+                                self._hardware.home()
+                                self.logger.status(f"Homed selector")
+                            except Exception as e:
+                                self.logger.error(f"Could not home selector: {e}")
+                                raise e
                         else:
+                            self.logger.info(f"Moving selector to {message.data}")
                             self._hardware.set_position(int(message.data))
-                            if self.logger:
-                                self.logger.status(f"Moving selector to {message.data}")
+                            self.logger.status(f"Moved selector to {message.data}")
             except Exception as e: # Except hardware errors
                 self._hardware_error = repr(e)
-                if self.logger:
-                    self.logger.error(f'Attempt by {message.origin} to set position to {message.data} failed with {self._hardware_error}')
+                self._hardware = None
+                self.logger.error(f'Attempt by {message.origin} to set position to {message.data} failed with {self._hardware_error}')
         else:
-            if self.logger:
-                self.logger.status(f'{message.origin} tried to set selector position to {message.data}, but no hardware connected.')
-    
+            self.logger.status(f'{message.origin} tried to set selector position to {message.data}, but no hardware connected.')
+
+
     def speed_control_callback(self, message):
         """Run on a pubsub notification to smax_table:selector:speed_control_key"""
-        if self.logger:
-            date = message.timestamp
-            self.logger.info(f'Received callback notification for {message.smaxname} from {message.origin} with data {message.data} at {date}')
+        date = message.timestamp
+        self.logger.info(f'Received callback notification for {message.smaxname} from {message.origin} with data {message.data} at {date}')
+        
+        if self._hardware is None:
+            self.connect_hardware()
         
         if self._hardware:
             try:
                 with self._hardware_lock:
+                    self.logger.info(f"Setting selector wheel speed to {int(message.data)}")
                     self._hardware.set_speed(int(message.data))
-                    if self.logger:
-                        self.logger.info(f"Setting selector wheel speed to {int(message.data)}")
+                    self.logger.status(f'{message.origin} set selector speed to {message.data}')
             except Exception as e: # Except hardware errors
                 self._hardware_error = repr(e)
-                if self.logger:
-                    self.logger.error(f'Attempt by {message.origin} to set selector speed to {message.data} failed with {self._hardware_error}')
-                
-            if self.logger:
-                self.logger.status(f'{message.origin} set selector speed to {message.data}')
+                self._hardware = None
+                self.logger.error(f'Attempt by {message.origin} to set selector speed to {message.data} failed with {self._hardware_error}')
         else:
-            if self.logger:
-                self.logger.status(f'Received {message.origin} to set selector speed to {message.data}, but no hardware connected.')
+            self.logger.status(f'Received {message.origin} to set selector speed to {message.data}, but no hardware connected.')
                 
     def angle_tolerance_control_callback(self, message):
         """Run on a pubsub notification to smax_table:selector:angle_tolerance_control_key"""
-        if self.logger:
-            date = message.timestamp
-            self.logger.info(f'Received callback notification for {message.smaxname} from {message.origin} with data {message.data} at {date}')
+        date = message.timestamp
+        self.logger.info(f'Received callback notification for {message.smaxname} from {message.origin} with data {message.data} at {date}')
+        
+        if self._hardware is None:
+            self.connect_hardware()
         
         if self._hardware:
             try:
                 with self._hardware_lock:
+                    self.logger.info(f"Setting selector wheel speed to {int(message.data)}")
                     self._hardware.set_angle_tolerance(float(message.data))
-                    if self.logger:
-                        self.logger.info(f"Setting selector wheel speed to {int(message.data)}")
+                    self.logger.status(f'{message.origin} set selector angle tolerance to {message.data}')
             except Exception as e: # Except hardware errors
                 self._hardware_error = repr(e)
-                if self.logger:
-                    self.logger.error(f'Attempt by {message.origin} to set selector angle tolerance to {message.data} failed with {self._hardware_error}')
-                
-            if self.logger:
-                self.logger.status(f'{message.origin} set selector angle tolerance to {message.data}')
+                self._hardware = None
+                self.logger.error(f'Attempt by {message.origin} to set selector angle tolerance to {message.data} failed with {self._hardware_error}')
         else:
-            if self.logger:
-                self.logger.status(f'Received {message.origin} to set selector angle tolerance to {message.data}, but no hardware connected.')
+            self.logger.status(f'Received {message.origin} to set selector angle tolerance to {message.data}, but no hardware connected.')
     
     def angle_offset_control_callback(self, message):
         """Run on a pubsub notification to smax_table:selector:angle_offset_control_key"""
-        if self.logger:
-            date = message.timestamp
-            self.logger.info(f'Received callback notification for {message.smaxname} from {message.origin} with data {message.data} at {date}')
+        date = message.timestamp
+        self.logger.info(f'Received callback notification for {message.smaxname} from {message.origin} with data {message.data} at {date}')
+        
+        if self._hardware is None:
+            self.connect_hardware()
         
         if self._hardware:
             try:
                 with self._hardware_lock:
+                    self.logger.info(f"Setting selector wheel offset to {int(message.data)}")
                     self._hardware.set_angle_offset(float(message.data))
-                    if self.logger:
-                        self.logger.info(f"Setting selector wheel offset to {int(message.data)}")
+                    self.logger.status(f'{message.origin} set selector wheel offset to {message.data}')
             except Exception as e: # Except hardware errors
                 self._hardware_error = repr(e)
-                if self.logger:
-                    self.logger.error(f'Attempt by {message.origin} to set selector wheel offset to {message.data} failed with {self._hardware_error}')
-                
-            if self.logger:
-                self.logger.status(f'{message.origin} set selector wheel offset to {message.data}')
+                self._hardware = None
+                self.logger.error(f'Attempt by {message.origin} to set selector wheel offset to {message.data} failed with {self._hardware_error}')
         else:
-            if self.logger:
-                self.logger.status(f'Received {message.origin} to set selector wheel offset to {message.data}, but no hardware connected.')
+            self.logger.status(f'Received {message.origin} to set selector wheel offset to {message.data}, but no hardware connected.')

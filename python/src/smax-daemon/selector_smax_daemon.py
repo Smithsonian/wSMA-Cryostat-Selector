@@ -11,13 +11,17 @@ from retrying import retry
 import systemd.daemon
 import signal
 
+from smax import SmaxRedisClient, SmaxConnectionError, SmaxKeyError, join, normalize_pair
+from gclib import GclibError
+
+from selector_interface import SelectorInterface as HardwareInterface
+
 # Change these based on system setup
 default_smax_config = os.path.expanduser("~smauser/wsma_config/smax_config.json")
 default_config = os.path.expanduser("~smauser/wsma_config/cryostat/selector/selector_config.json")
 
 # Change these lines per application
 daemon_name = "selector_smax_daemon"
-from selector_interface import SelectorInterface as HardwareInterface
 
 # add a logging level for status output
 def add_logging_level(level_name, level_num, method_name=None):
@@ -68,22 +72,25 @@ def add_logging_level(level_name, level_num, method_name=None):
     setattr(logging, level_name, level_num)
     setattr(logging.getLoggerClass(), method_name, logForLevel)
     setattr(logging, method_name, logToRoot)
-    
-add_logging_level('STATUS', logging.WARNING+5)
+
+try:
+    add_logging_level('STATUS', logging.WARNING+5)
+except AttributeError:
+    pass
 
 # Change between testing and production
-logging_level = logging.WARNING
+logging_level = logging.INFO
 
 logging.basicConfig(format='%(levelname)s - %(message)s', level=logging_level)
 
 READY = 'READY=1'
 STOPPING = 'STOPPING=1'
 
-from smax import SmaxRedisClient, SmaxConnectionError, SmaxKeyError, join, normalize_pair
-
 def _is_smaxconnectionerror(exception):
     return isinstance(exception, SmaxConnectionError)
 
+def _is_gclibconnectionerror(exception):
+    return isinstance(exception, GclibError)
 
 class SelectorSmaxService:
     def __init__(self, config=default_config, smax_config=default_smax_config):
@@ -113,7 +120,7 @@ class SelectorSmaxService:
         self.delay = 1.0
 
     def _init_logger(self):
-        logger = logging.getLogger(__name__)
+        logger = logging.getLogger(daemon_name)
         logger.setLevel(logging_level)
         file_handler = logging.FileHandler(f'{daemon_name.lower()}.log')
         file_handler.setLevel(logging_level)
@@ -169,10 +176,9 @@ class SelectorSmaxService:
     def start(self):
         """Code to be run before the service's main loop"""
         # Start up code
-
+        
         # Create the hardware interface
         self.hardware = HardwareInterface(config=self._config, logger=self.logger)
-        self.logger.status('Created hardware interface object')
         
         # Create the SMA-X interface
         #
@@ -180,6 +186,14 @@ class SelectorSmaxService:
         # use retrying, and hang until we get a connection.
         self.connect_to_smax()
         
+        try:
+            self.connect_to_hardware()
+            self.logger.status('Created hardware interface object')
+        except Exception as e:
+            self.logger.error(f'Hardware connection failed.')
+            
+        
+        # Initialize the hardware
         self.initialize_hardware()
 
         # systemctl will wait until this notification is sent
@@ -188,7 +202,22 @@ class SelectorSmaxService:
 
         # Run the service's main loop
         self.run()
+    
+    @retry(wait_exponential_multiplier=1000, wait_exponential_max=30000, retry_on_exception=_is_gclibconnectionerror)
+    def connect_to_hardware(self):
+        """Create a connection to hardware.  Retry this if the connection fails"""
+        try:
+            self.hardware.connect_hardware()
+            self.logger.status(f'Connected to hardware')
+            self.smax_client.smax_share(join(self.table, self.key), 'comm_status', 'connection error')
+            self.smax_client.smax_share(join(self.table, self.key), 'comm_error', repr(e))
+        except GclibError as e:
+            self.logger.error(f'Could not connect to hardware: {e}')
+            self.smax_client.smax_share(join(self.table, self.key), 'comm_status', 'connection error')
+            self.smax_client.smax_share(join(self.table, self.key), 'comm_error', repr(e))
+            raise e
         
+    
     def initialize_hardware(self):
         """Run this code to get initial values for the hardware from SMA-X, and to initialize the hardware"""
         
@@ -280,7 +309,7 @@ class SelectorSmaxService:
                 
         logged_data = self.hardware.logging_action()
 
-        self.logger.status(f"Received data for {len(logged_data)} keys.")    
+        self.logger.info(f"Received data for {len(logged_data)} keys.")    
         # write values to SMA-X
         # Retry if connection is missing
         try:

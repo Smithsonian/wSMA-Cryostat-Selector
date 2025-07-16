@@ -14,14 +14,14 @@ name = 'wsma_cryostat_selector'
 authors = [{name="Paul Grimes", email="pgrimes@cfa.harvard.edu"}]
 description = 'wSMA cryostat selector system daemon'
 readme = 'README.md'
-requires-python = '>=3.7'
+requires-python = '>=3.10'
 license = {text = 'MIT License'}
 dependencies = [
     'gclib',
     'systemd-python',
     'retrying',
     'argparse',
-    'smax @ https://github.com/Smithsonian/smax-python/archive/refs/tags/v1.0.3.zip'
+    'smax @ https://github.com/Smithsonian/smax-python/archive/refs/tags/v1.2.2.zip'
 ]
 dynamic = ["version"]
 

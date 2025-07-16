@@ -1,11 +1,15 @@
 __version__ = '1.0.1'
 
 from time import sleep
+import logging
 
 import gclib
 
 default_IP = "192.168.42.100"
 
+loglevel = logging.INFO
+logging.basicConfig(level=loglevel)
+logger = logging.getLogger(__name__)
 
 class Selector(object):
     """Class for communicating with the wSMA Selector Wheel Controller.
@@ -57,7 +61,7 @@ class Selector(object):
     #: str: address of the controller's resolver position register
     _resolver_position_var = 'R[1]'
 
-    def __init__(self, ip_address=default_IP, debug=False):
+    def __init__(self, ip_address=default_IP, logger=logger, debug=False):
         """Create a SelectorWheel object for communication with one Selector Wheel Controller.
         Opens a Modbus TCP connection to the Selector Wheel controller at `ip_address`, and reads the
         current _position, speed etc.
@@ -66,6 +70,13 @@ class Selector(object):
         """
         #: (:obj:`ModbusTcpClient`): Client for communicating with the controller
         self._debug = debug
+        if logger:
+            self._logger = logger
+        else:
+            self._logger = logging.getLogger(__name__)
+        
+        if self._debug:
+            self._logger.setLevel(logging.DEBUG)
         
         self._time_step = 0.1
         
@@ -80,9 +91,20 @@ class Selector(object):
         
             self.update_all()
         except gclib.GclibError as e:
-            print(f"GCLib error: {str(e)}")
+            self._logger.error(f"GCLib error: {str(e)}")
             if str(e) == 'device failed to open':
-                print(f"Could not connect to selector controller at {ip_address}")
+                self._logger.error(f"Could not connect to selector controller at {ip_address}")
+                
+    def is_connected(self):
+        """Return the connection status to the Galil device"""
+        try:
+            status = self._client._cc()
+            if status == 0:
+                status = True
+        except gclib.GcLibError as e:
+            status = False
+        
+        return status
         
     def disconnect(self):
         """Disconnect from the modbus server"""
@@ -171,24 +193,26 @@ class Selector(object):
     def read_value(self, var_name):
         """Read a variable value from the Galil controller"""
         cmd = f'MG {var_name}'
-        if self._debug:
-            print(f"Calling '{cmd}'")
+        self._logger.debug(f"Calling '{cmd}'")
         try:
             ret = self._client.GCommand(cmd)
         except gclib.GclibError as e:
-            raise RuntimeWarning('GCLib: Unknown variable')
+            self._logger.error(f"GCLib Error: {e}")
+            raise e
         
         return float(ret)
     
     def write_value(self, var_name, value):
         """Read a variable value from the Galil controller"""
         cmd = f'{var_name}={value}'
-        if self._debug:
-            print(f"Calling '{cmd}'")
+        self._logger.debug(f"Calling '{cmd}'")
         try:
             ret = self._client.GCommand(cmd)
         except gclib.GclibError as e:
-            raise RuntimeWarning(f'GCLib: Error writing value {e}')
+            self._logger.error(f"GCLib Error: {e}")
+            raise e
+        
+        return ret
 
     def get_command_position(self):
         """Read the commanded position from the controller."""
@@ -355,12 +379,16 @@ class Selector(object):
         if position not in range(1, 5):
             raise ValueError("Requested position must be an integer between 1 and 4.")
 
-        self.write_value(self._compos_var, int(position))
-        sleep(self._time_step)
-        self._client.GMotionComplete('A')
+        try:
+            self.write_value(self._compos_var, int(position))
+            sleep(self._time_step)
+            self._client.GMotionComplete('A')
 
-        self.update()
-        
+            self.update()
+        except gclib.GclibError as e:
+            self._logger.error(f"GCLib Error: {e}")
+            raise e
+            
     def set_angle_tolerance(self, tolerance):
         """Set the angle tolerance for corrections.
         
@@ -391,9 +419,13 @@ class Selector(object):
     def home(self):
         """Move the wheel to the home position, and then to position 1.
         Selector wheel controller automatically homes on power on."""
-        self.write_value(self._compos_var, 5)
-        sleep(self._time_step)
-        self._client.GMotionComplete('A')
-        sleep(self._time_step)
+        try:
+            self.write_value(self._compos_var, 5)
+            sleep(self._time_step)
+            self._client.GMotionComplete('A')
+            sleep(self._time_step)
 
-        self.update_all()
+            self.update_all()
+        except gclib.GclibError as e:
+            self._logger.error(f"GCLib Error: {e}")
+            raise e
