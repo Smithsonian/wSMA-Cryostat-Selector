@@ -178,7 +178,7 @@ class SelectorSmaxService:
         # Start up code
         
         # Create the hardware interface
-        self.hardware = HardwareInterface(config=self._config, logger=self.logger)
+        self.hardware = HardwareInterface(config=self._config, logger=self.logger, parent=self)
         
         # Create the SMA-X interface
         #
