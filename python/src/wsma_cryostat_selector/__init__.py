@@ -255,7 +255,7 @@ class Selector(object):
     def get_a(self):
         """Get the selector status using read_array"""
         ret = self.read_array('A', 0, 8)
-        self._command_pos = ret[0]
+        self._command_position = ret[0]
         self._position = ret[1]
         self._speed = ret[2]
         self._status = ret[3]
