@@ -255,10 +255,10 @@ class Selector(object):
     def get_a(self):
         """Get the selector status using read_array"""
         ret = self.read_array('A', 0, 8)
-        self._command_position = ret[0]
-        self._position = ret[1]
-        self._speed = ret[2]
-        self._status = ret[3]
+        self._command_position = int(ret[0])
+        self._position = int(ret[1])
+        self._speed = int(ret[2])
+        self._status = int(ret[3])
         self._time = ret[4]
         self._angle = ret[5]
         self._angle_error = ret[6]
@@ -269,16 +269,16 @@ class Selector(object):
     def get_pos(self):
         """Get the position info using read_array"""
         ret = self.read_array('POS', 0, 3)
-        self._pos_1 = ret[0]
-        self._pos_2 = ret[1]
-        self._pos_3 = ret[2]
-        self._pos_4 = ret[3]
+        self._pos_1 = int(ret[0])
+        self._pos_2 = int(ret[1])
+        self._pos_3 = int(ret[2])
+        self._pos_4 = int(ret[3])
         
     def get_resolver(self):
         """Get the resolver info using read_array"""
         ret = self.read_array('R', 0, 1)
-        self._resolver_turns = ret[0]
-        self._resolver_position = ret[1]
+        self._resolver_turns = int(ret[0])
+        self._resolver_position = int(ret[1])
 
 
     def get_pos_1(self):
