@@ -79,6 +79,7 @@ class Selector(object):
             self._logger.setLevel(logging.DEBUG)
         
         self._time_step = 0.1
+        self._sleep = 0.01
         
         self._client = gclib.py()
         
@@ -197,10 +198,29 @@ class Selector(object):
         try:
             ret = self._client.GCommand(cmd)
         except gclib.GclibError as e:
-            self._logger.error(f"GCLib Error: {e}")
-            raise e
+            sleep(self._sleep)
+            try:
+                ret = self._client.GCommand(cmd)
+            except gclib.GclibError as e:
+                self._logger.error(f"GCLib Error: {e}")
+                raise e
         
         return float(ret)
+    
+    def read_array(self, array_name, start=0, end=1):
+        """Read an array from the Galil controller using GArrayUpload"""
+        self._logger.debug(f"Reading array '{array_name}'")
+        try:
+            ret = self._client.GArrayUpload(array_name, start, end)
+        except gclib.GclibError as e:
+            sleep(self._sleep)
+            try:
+                ret = self._client.GArrayUpload(array_name)
+            except gclib.GclibError as e:
+                self._logger.error(f"GCLib Error: {e}")
+                raise e
+        
+        return ret
     
     def write_value(self, var_name, value):
         """Read a variable value from the Galil controller"""
@@ -209,8 +229,12 @@ class Selector(object):
         try:
             ret = self._client.GCommand(cmd)
         except gclib.GclibError as e:
-            self._logger.error(f"GCLib Error: {e}")
-            raise e
+            sleep(self._sleep)
+            try:
+                ret = self._client.GCommand(cmd)
+            except gclib.GclibError as e:
+                self._logger.error(f"GCLib Error: {e}")
+                raise e
         
         return ret
 
@@ -227,6 +251,35 @@ class Selector(object):
         self._position = int(ret)
         
         return self.position
+
+    def get_a(self):
+        """Get the selector status using read_array"""
+        ret = self.read_array('POS', 0, 8)
+        self._command_pos = ret[0]
+        self._position = ret[1]
+        self._speed = ret[2]
+        self._status = ret[3]
+        self._time = ret[4]
+        self._angle = ret[5]
+        self._angle_error = ret[6]
+        self._angle_tolerance = ret[7]
+        self._angle_offset = ret[8]
+        
+
+    def get_pos(self):
+        """Get the position info using read_array"""
+        ret = self.read_array('POS', 0, 3)
+        self._pos_1 = ret[0]
+        self._pos_2 = ret[1]
+        self._pos_3 = ret[2]
+        self._pos_4 = ret[3]
+        
+    def get_resolver(self):
+        """Get the resolver info using read_array"""
+        ret = self.read_array('R', 0, 1)
+        self._resolver_turns = ret[0]
+        self._resolver_position = ret[1]
+
 
     def get_pos_1(self):
         """Read pos_1 from the controller."""
@@ -321,15 +374,7 @@ class Selector(object):
            
     def update(self, debug=False):
         """Update all the data from the selector."""
-        self.get_command_position()
-        self.get_position()
-        self.get_speed()
-        self.get_time()
-        self.get_status()
-        self.get_angle()
-        self.get_angle_error()
-        self.get_angle_tolerance()
-        self.get_angle_offset()
+        self.get_a()
         if debug:
             self.update_extra()
             
@@ -337,16 +382,14 @@ class Selector(object):
         """Get the extra status variables from the controller.
         
         These will only change when the wheel is rehomed."""
-        self.get_pos_1()
-        self.get_pos_2()
-        self.get_pos_3()
-        self.get_pos_4()
-        self.get_resolver_turns()
-        self.get_resolver_position()
+        self.get_pos()
+        sleep(self._sleep)
+        self.get_resolver()
 
     def update_all(self):
         """Get all the status variables from the controller"""
         self.update()
+        sleep(self._sleep)
         self.update_extra()
 
     def set_speed(self, speed):
@@ -363,6 +406,7 @@ class Selector(object):
             raise ValueError("Speed must be an integer between 1 and 3")
 
         self.write_value(self._speed_var, int(speed))
+        sleep(self._sleep)
         self._speed = self.get_speed()
 
     def set_position(self, position):
@@ -398,6 +442,7 @@ class Selector(object):
             tolerance = abs(tolerance)
 
         self.write_value(self._angle_tolerance_var, f"{tolerance:.3f}")
+        sleep(self.__sleep)
         self._angle_tolerance = self.get_angle_tolerance()
 
     def set_angle_offset(self, offset):
@@ -410,6 +455,7 @@ class Selector(object):
         Args:
             offset (float): angle offset in degrees"""
         self.write_value(self._angle_offset_var, f"{offset:.3f}")
+        sleep(self._sleep)
         self._angle_offset = self.get_angle_offset()
         
     def zero_angle_offset(self):
