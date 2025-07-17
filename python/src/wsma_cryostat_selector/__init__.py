@@ -88,7 +88,7 @@ class Selector(object):
     def connect(self, ip_address=default_IP):
         
         try:
-            self._client.GOpen(f"{ip_address} -s ALL")
+            self._client.GOpen(f"{ip_address}")
         
             self.update_all()
         except gclib.GclibError as e:
