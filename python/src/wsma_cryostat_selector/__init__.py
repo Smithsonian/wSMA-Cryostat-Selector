@@ -215,7 +215,7 @@ class Selector(object):
         except gclib.GclibError as e:
             sleep(self._sleep)
             try:
-                ret = self._client.GArrayUpload(array_name)
+                ret = self._client.GArrayUpload(array_name, start, end)
             except gclib.GclibError as e:
                 self._logger.error(f"GCLib Error: {e}")
                 raise e
