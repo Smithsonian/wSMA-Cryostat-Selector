@@ -79,7 +79,7 @@ except AttributeError:
     pass
 
 # Change between testing and production
-logging_level = logging.INFO
+logging_level = logging.STATUS
 
 logging.basicConfig(format='%(levelname)s - %(message)s', level=logging_level)
 
