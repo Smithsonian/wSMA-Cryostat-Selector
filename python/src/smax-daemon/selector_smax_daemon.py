@@ -79,7 +79,7 @@ except AttributeError:
     pass
 
 # Change between testing and production
-logging_level = logging.INFO
+logging_level = logging.STATUS
 
 logging.basicConfig(format='%(levelname)s - %(message)s', level=logging_level)
 
@@ -178,7 +178,7 @@ class SelectorSmaxService:
         # Start up code
         
         # Create the hardware interface
-        self.hardware = HardwareInterface(config=self._config, logger=self.logger)
+        self.hardware = HardwareInterface(config=self._config, logger=self.logger, parent=self)
         
         # Create the SMA-X interface
         #

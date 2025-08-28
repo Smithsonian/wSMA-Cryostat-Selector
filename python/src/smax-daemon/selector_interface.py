@@ -32,14 +32,16 @@ def flatten_logged_data(dictionary, parent_key="", separator=":"):
 
 class SelectorInterface:
     """An daemon interface for communicating with a wSMA Cryomech Selector."""
-    def __init__(self, config=None, logger=None):
+    def __init__(self, config=None, logger=None, parent=None):
         """Create a new daemon class that carries out monitoring and control of a simulated
         piece of hardware. 
         
         Pass the initial config to the hardware object if given.
         
         Keyword Arguments:
-            config (dict) : dictionary of config values for the hardware and daemon"""
+            config (dict) : dictionary of config values for the hardware and daemon
+            logger (logging.Logger) : logger for the hardware interface
+            parent (SelectorSmaxService) : parent daemon, used to call logging_action after callback"""
         self._hardware = None
         self._hardware_config = None
         self._hardware_lock = threading.Lock()
@@ -48,8 +50,12 @@ class SelectorInterface:
         
         self.logger = logger
         
+        self._parent = parent
+        
         if config:
             self.configure(config)
+            
+
         
     def __getattr__(self, name):
         """Override __getattr__ so that we can pass requests for attributes to the
@@ -225,6 +231,10 @@ class SelectorInterface:
                 self.logger.error(f'Attempt by {message.origin} to set position to {message.data} failed with {self._hardware_error}')
         else:
             self.logger.status(f'{message.origin} tried to set selector position to {message.data}, but no hardware connected.')
+            
+        if self._parent:
+            self.logger.status(f'Calling parent daemons logging action')
+            self._parent.smax_logging_action()
 
 
     def speed_control_callback(self, message):
@@ -247,6 +257,10 @@ class SelectorInterface:
                 self.logger.error(f'Attempt by {message.origin} to set selector speed to {message.data} failed with {self._hardware_error}')
         else:
             self.logger.status(f'Received {message.origin} to set selector speed to {message.data}, but no hardware connected.')
+        
+        if self._parent:
+            self.logger.status(f'Calling parent daemons logging action')
+            self._parent.smax_logging_action()
                 
     def angle_tolerance_control_callback(self, message):
         """Run on a pubsub notification to smax_table:selector:angle_tolerance_control_key"""
@@ -268,6 +282,10 @@ class SelectorInterface:
                 self.logger.error(f'Attempt by {message.origin} to set selector angle tolerance to {message.data} failed with {self._hardware_error}')
         else:
             self.logger.status(f'Received {message.origin} to set selector angle tolerance to {message.data}, but no hardware connected.')
+        
+        if self._parent:
+            self.logger.status(f'Calling parent daemons logging action')
+            self._parent.smax_logging_action()
     
     def angle_offset_control_callback(self, message):
         """Run on a pubsub notification to smax_table:selector:angle_offset_control_key"""
@@ -289,3 +307,7 @@ class SelectorInterface:
                 self.logger.error(f'Attempt by {message.origin} to set selector wheel offset to {message.data} failed with {self._hardware_error}')
         else:
             self.logger.status(f'Received {message.origin} to set selector wheel offset to {message.data}, but no hardware connected.')
+            
+        if self._parent:
+            self.logger.status(f'Calling parent daemons logging action')
+            self._parent.smax_logging_action()
