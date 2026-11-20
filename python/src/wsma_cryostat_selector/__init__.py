@@ -5,6 +5,8 @@ import logging
 
 import gclib
 
+from gclib.Interrupt.Type import MotionComplete
+
 default_IP = "192.168.42.100"
 
 loglevel = logging.INFO
@@ -81,17 +83,17 @@ class Selector(object):
         self._time_step = 0.1
         self._sleep = 0.01
         
-        self._client = gclib.py()
-        
         self.connect(ip_address)
         
     def connect(self, ip_address=default_IP):
         
         try:
-            self._client.GOpen(f"{ip_address}")
+            self._client = gclib.Controller(f"{ip_address}")
+            
+            self._client.set_interrupts(MotionComplete)
         
             self.update_all()
-        except gclib.GclibError as e:
+        except gclib.Error as e:
             self._logger.error(f"GCLib error: {str(e)}")
             if str(e) == 'device failed to open':
                 self._logger.error(f"Could not connect to selector controller at {ip_address}")
@@ -102,14 +104,14 @@ class Selector(object):
             status = self._client._cc()
             if status == 0:
                 status = True
-        except gclib.GcLibError as e:
+        except gclib.Error as e:
             status = False
         
         return status
         
     def disconnect(self):
-        """Disconnect from the modbus server"""
-        self._client.disconnect()
+        """Disconnect from the controller"""
+        self._client.close()
         
     @property
     def command_position(self):
@@ -196,12 +198,12 @@ class Selector(object):
         cmd = f'MG {var_name}'
         self._logger.debug(f"Calling '{cmd}'")
         try:
-            ret = self._client.GCommand(cmd)
-        except gclib.GclibError as e:
+            ret = self._client.command(cmd)
+        except gclib.Error as e:
             sleep(self._sleep)
             try:
-                ret = self._client.GCommand(cmd)
-            except gclib.GclibError as e:
+                ret = self._client.command(cmd)
+            except gclib.Error as e:
                 self._logger.error(f"GCLib Error: {e}")
                 raise e
         
@@ -211,12 +213,12 @@ class Selector(object):
         """Read an array from the Galil controller using GArrayUpload"""
         self._logger.debug(f"Reading array '{array_name}'")
         try:
-            ret = self._client.GArrayUpload(array_name, start, end)
-        except gclib.GclibError as e:
+            ret = self._client.array(array_name, start, end)
+        except gclib.Error as e:
             sleep(self._sleep)
             try:
-                ret = self._client.GArrayUpload(array_name, start, end)
-            except gclib.GclibError as e:
+                ret = self._client.array(array_name, start, end)
+            except gclib.Error as e:
                 self._logger.error(f"GCLib Error: {e}")
                 raise e
         
@@ -227,12 +229,12 @@ class Selector(object):
         cmd = f'{var_name}={value}'
         self._logger.debug(f"Calling '{cmd}'")
         try:
-            ret = self._client.GCommand(cmd)
-        except gclib.GclibError as e:
+            ret = self._client.command(cmd)
+        except gclib.Error as e:
             sleep(self._sleep)
             try:
-                ret = self._client.GCommand(cmd)
-            except gclib.GclibError as e:
+                ret = self._client.command(cmd)
+            except gclib.Error as e:
                 self._logger.error(f"GCLib Error: {e}")
                 raise e
         
@@ -426,10 +428,10 @@ class Selector(object):
         try:
             self.write_value(self._compos_var, int(position))
             sleep(self._time_step)
-            self._client.GMotionComplete('A')
+            self._client.subscribe_interrupts(self._logger.debug("Motion Complete"), 10000)
 
             self.update()
-        except gclib.GclibError as e:
+        except gclib.Error as e:
             self._logger.error(f"GCLib Error: {e}")
             raise e
             
@@ -468,10 +470,10 @@ class Selector(object):
         try:
             self.write_value(self._compos_var, 5)
             sleep(self._time_step)
-            self._client.GMotionComplete('A')
+            self._client.subscribe_interrupts(self._logger.debug("Motion Complete"), 10000)
             sleep(self._time_step)
 
             self.update_all()
-        except gclib.GclibError as e:
+        except gclib.Error as e:
             self._logger.error(f"GCLib Error: {e}")
             raise e

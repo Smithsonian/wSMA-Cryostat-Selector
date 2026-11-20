@@ -17,7 +17,7 @@ readme = 'README.md'
 requires-python = '>=3.10'
 license = {text = 'MIT License'}
 dependencies = [
-    'gclib',
+    'gclib >= 2.0.0',
     'systemd-python',
     'retrying',
     'argparse',
